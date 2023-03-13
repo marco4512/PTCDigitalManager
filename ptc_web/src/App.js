@@ -7,7 +7,7 @@ function App() {
       <header className="App-header">
         
         <p>
-          Edit <code>Teban</code> and save to reload.
+        Esteban se la come 
         </p>
         <a
           className="App-link"
