@@ -11,9 +11,10 @@ function Login() {
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label className="Titulologingmail">Correo Electronico</Form.Label>
             <Form.Control type="email" placeholder="Ingrese correo" />
-            <Form.Text className="text-muted">
+            <Form.Text className="colores">
               Ingrese un correo valido y que exista.
             </Form.Text>
+        
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="formBasicPassword">
@@ -21,7 +22,9 @@ function Login() {
             <Form.Control type="password" placeholder="Ingresa contraseña" />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicCheckbox">
-            <Form.Check type="checkbox" label="Check me out" />
+          {/* <Form.Text className="text-muted">
+              Ingrese una contraseña valida.
+            </Form.Text> */}
           </Form.Group>
 
           <div className="BotonLogin">
