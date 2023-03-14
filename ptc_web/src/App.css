@@ -6,26 +6,31 @@
   height: 40vmin;
   pointer-events: none;
 }
-.home{
-  color:red;
+
+.home {
+  color: red;
 }
-.navBar{
+
+.navBar {
   width: 100vw;
   background-color: #282c34;
   height: 100px;
   display: flex;
 }
-.LogoEmpresa{
+
+.LogoEmpresa {
   width: 25%;
   height: 98%;
   border: 1px solid black;
 }
-.Separador{
+
+.Separador {
   width: 10%;
   height: 100%;
- 
+
 }
-.PartesPagina{
+
+.PartesPagina {
   width: 65%;
   text-align: right;
   margin-right: 10px;
@@ -33,27 +38,22 @@
   flex-direction: row-reverse;
 }
 
-.Titulologingmail{
-  width: 55%;
-  text-align: right;
-  margin-right: 10px;
-  align-items: center;
-  flex-direction: row-reverse;
+.Titulologingmail {
+  width: 95%;
+  text-align: center;
+
 }
 
-.Titulologinpas{
-  width: 53%;
-  text-align: right;
-  margin-right: 10px;
-  align-items: center;
-  flex-direction: row-reverse;
-}
-
-.BotonLogin{
+.Titulologinpas {
+  width: 95%;
   text-align: center;
 }
 
-.buttonOpcion{
+.BotonLogin {
+  text-align: center;
+}
+
+.buttonOpcion {
   text-align: center;
   align-items: center;
   border: none;
@@ -66,11 +66,12 @@
   margin-left: 5px;
   border-radius: 10px;
   color: white;
-  background-color:#282c34;
-  transition:all 1.5s;
-  position:relative;
+  background-color: #282c34;
+  transition: all 1.5s;
+  position: relative;
 }
-.debajo{
+
+.debajo {
   background-color: #F1C40F;
   width: 190%;
   height: 1px;
@@ -78,22 +79,44 @@
   bottom: 0px;
   left: 0px;
 }
-.buttonOpcion:hover{
+
+.buttonOpcion:hover {
   margin-top: 19px;
   font-size: 25px;
   opacity: .9;
-  transition:all 1.3s;
+  transition: all 1.3s;
 
 }
-.container{
-  background: rgb(87, 78, 79); 
-  padding: 20px;
-  width: 55%; 
+
+.formularioXD {
+  width: 30%;
   margin: 0 auto;
-  border: 30px solid red;
-  font-family: cursive;
+  border-radius: 10px;
+  padding: 20px;
+  background: rgba( 155, 155, 155, 0.3 );
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  backdrop-filter: blur( 16.5px );
+  -webkit-backdrop-filter: blur( 16.5px );
+  border-radius: 10px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+
 }
-.form_login{
+
+.container {
+  background: rgb(87, 78, 79);
+  margin: 0 auto;
+  border: 1px solid red;
+  font-family: cursive;
+  width: 40%;
+}
+
+.pricipal {
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 5%;
+}
+
+.form_login {
   width: 65%;
   margin: 0 auto;
   background-color: #393d44;
@@ -101,7 +124,8 @@
   align-items: center;
   padding: 30px;
 }
-.parteSuperior{
+
+.parteSuperior {
   margin: 10px;
 }
 
@@ -132,6 +156,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

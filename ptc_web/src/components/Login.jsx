@@ -4,36 +4,36 @@ import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login() {
-    return (
-        <>
-        <div className="container ">
-        <Form>
-       
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        <Form.Label className="Titulologingmail">Correo Electronico</Form.Label>
-        <Form.Control type="email" placeholder="Ingrese correo" />
-        <Form.Text className="text-muted">
-          Ingrese un correo valido y que exista.
-        </Form.Text>
-      </Form.Group>
+  return (
+    <>
+    <div className="pricipal" >
+        <Form className="formularioXD" >
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label className="Titulologingmail">Correo Electronico</Form.Label>
+            <Form.Control type="email" placeholder="Ingrese correo" />
+            <Form.Text className="text-muted">
+              Ingrese un correo valido y que exista.
+            </Form.Text>
+          </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formBasicPassword">
-        <Form.Label className="Titulologinpas">Contraseña</Form.Label>
-        <Form.Control type="password" placeholder="Ingresa contraseña" />
-      </Form.Group>
-      <Form.Group className="mb-3" controlId="formBasicCheckbox">
-        <Form.Check type="checkbox" label="Check me out" />
-      </Form.Group>
-     
-      <div className="BotonLogin">      
-      <Button  variant="primary" type="submit">
-        Iniciar Seción
-      </Button>
+          <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Label className="Titulologinpas">Contraseña</Form.Label>
+            <Form.Control type="password" placeholder="Ingresa contraseña" />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formBasicCheckbox">
+            <Form.Check type="checkbox" label="Check me out" />
+          </Form.Group>
+
+          <div className="BotonLogin">
+            <Button variant="primary" type="submit">
+              Iniciar Seción
+            </Button>
+          </div>
+
+        </Form>
+
       </div>
-      
-    </Form>
-    </div>
     </>
-    );
+  );
 }
 export default Login;
