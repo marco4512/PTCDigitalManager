@@ -1,6 +1,5 @@
 .App {
   text-align: center;
-
 }
 
 .App-logo {
@@ -33,6 +32,27 @@
   align-items: center;
   flex-direction: row-reverse;
 }
+
+.Titulologingmail{
+  width: 55%;
+  text-align: right;
+  margin-right: 10px;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.Titulologinpas{
+  width: 53%;
+  text-align: right;
+  margin-right: 10px;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.BotonLogin{
+  text-align: center;
+}
+
 .buttonOpcion{
   text-align: center;
   align-items: center;
@@ -66,17 +86,20 @@
 
 }
 .container{
-  background: lightgray; 
-  padding: 10px;
-  width: 65%; 
+  background: rgb(87, 78, 79); 
+  padding: 20px;
+  width: 55%; 
   margin: 0 auto;
+  border: 30px solid red;
+  font-family: cursive;
 }
-#form_login{
-  width: 95%;
+.form_login{
+  width: 65%;
   margin: 0 auto;
-  background-color: #282c34;
+  background-color: #393d44;
   text-align: center;
   align-items: center;
+  padding: 30px;
 }
 .parteSuperior{
   margin: 10px;

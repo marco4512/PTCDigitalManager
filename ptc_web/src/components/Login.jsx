@@ -1,24 +1,39 @@
 import React from "react";
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 function Login() {
     return (
         <>
-        <br />
-            <div className="container" >
-                <form id="form_login">
-                    <div className="parteSuperior">
-                        <h1>LOGIN</h1>
-                        <label htmlFor="txtusu"><strong>Username</strong></label>
-                        <input type="text" id="txtusu"  className="form-control" required />
-                    </div>
-                    <div>
-                        <label htmlFor="txtpas"><strong>Password</strong></label>
-                        <input type="password" id="txtpas"  className="form-control" required />
-                    </div><br />
-                    <input type="submit" className="btn btn-primary" value="Login" />
-                </form>
-            </div>
-        </>
+        <div className="container ">
+        <Form>
+       
+      <Form.Group className="mb-3" controlId="formBasicEmail">
+        <Form.Label className="Titulologingmail">Correo Electronico</Form.Label>
+        <Form.Control type="email" placeholder="Ingrese correo" />
+        <Form.Text className="text-muted">
+          Ingrese un correo valido y que exista.
+        </Form.Text>
+      </Form.Group>
 
+      <Form.Group className="mb-3" controlId="formBasicPassword">
+        <Form.Label className="Titulologinpas">Contraseña</Form.Label>
+        <Form.Control type="password" placeholder="Ingresa contraseña" />
+      </Form.Group>
+      <Form.Group className="mb-3" controlId="formBasicCheckbox">
+        <Form.Check type="checkbox" label="Check me out" />
+      </Form.Group>
+     
+      <div className="BotonLogin">      
+      <Button  variant="primary" type="submit">
+        Iniciar Seción
+      </Button>
+      </div>
+      
+    </Form>
+    </div>
+    </>
     );
 }
 export default Login;
