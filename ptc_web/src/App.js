@@ -1,14 +1,14 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
-import AdminDashboard from './components/AdminDashboard';
-import Login from './components/Login';
-import Inventario from './components/Inventario';
-import Pedidos from './components/Pedidos';
-import Productos from './components/Productos';
-import Nav from './components/Nav';
-import Reportes from './components/Resportes';
-import PanelPrincipal from './components/PanelPrincipal';
+import Home from './components/Home.jsx';
+import AdminDashboard from './components/AdminDashboard.jsx';
+import Login from './components/Login.jsx';
+import Inventario from './components/Inventario.jsx';
+import Pedidos from './components/Pedidos.jsx';
+import Productos from './components/Productos.jsx';
+import Nav from './components/Nav.jsx';
+import Reportes from './components/Resportes.jsx';
+import PanelPrincipal from './components/PanelPrincipal.jsx';
 function App() {
   return (
     <>

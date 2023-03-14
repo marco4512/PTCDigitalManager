@@ -1,19 +1,18 @@
 import { React, useState } from "react";
-import { query, where, getDocs, getDoc, getFirestore, collection, setDoc, doc, update, updateDoc } from "firebase/firestore";
+import { doc, getDocs, getFirestore, collection } from "firebase/firestore";
 function Inventario() {
+    const db = getFirestore();
     async function LeerData() {
-        const firestore = getFirestore()
-        const docRef = doc(firestore,'Inventario')
-        const docSnap = await getDoc(docRef)
-        console.log(docRef)
+        const colRef = collection(db, "Inventario");
+        const docsSnap = await getDocs(colRef);
+        docsSnap.forEach(doc => { console.log(doc.data()); })
     }
 
-
-return (
-    <>
-        <h1 className="home">Inventario</h1>
-        <button onClick={LeerData}>Push</button>
-    </>
-);
+    return (
+        <>
+            <h1 className="home">Inventario</h1>
+            <button onClick={LeerData}>Push</button>
+        </>
+    );
 }
 export default Inventario;
