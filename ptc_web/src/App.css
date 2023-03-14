@@ -53,8 +53,20 @@
   font-size:larger;
 }
 
-.colores{
-  color: red;
+.Titulos{
+  width: 95%;
+  text-align: center;
+  color: black;
+  font-size: 2cm;
+  font-family:'Times New Roman', Times, serif;
+}
+
+.SubTitulos{
+  width: 95%;
+  text-align: center;
+  color:#7f8682;
+  font-size: 1cm;
+  font-family:'Times New Roman', Times, serif;
 }
 
 .BotonLogin {
@@ -122,6 +134,8 @@
   width: 100%;
   margin: 0 auto;
   padding-top: 5%;
+  height: 100vh;
+  background-color: #A4ACA8;
 }
 
 .form_login {
