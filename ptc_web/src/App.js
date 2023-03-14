@@ -7,6 +7,8 @@ import Inventario from './components/Inventario';
 import Pedidos from './components/Pedidos';
 import Productos from './components/Productos';
 import Nav from './components/Nav';
+import Reportes from './components/Resportes';
+import PanelPrincipal from './components/PanelPrincipal';
 function App() {
   return (
     <>
@@ -18,6 +20,8 @@ function App() {
         <Route path='/stock' element={<Inventario />} />
         <Route path='/pedido' element={<Pedidos />} />
         <Route path='/productos' element={<Productos />} />
+        <Route path='/reportes' element={<Reportes />} />
+        <Route path='/principal' element={<PanelPrincipal />} />
       </Routes>
     </>
   );
