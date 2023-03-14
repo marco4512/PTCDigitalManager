@@ -65,6 +65,22 @@
   transition:all 1.3s;
 
 }
+.container{
+  background: lightgray; 
+  padding: 10px;
+  width: 65%; 
+  margin: 0 auto;
+}
+#form_login{
+  width: 95%;
+  margin: 0 auto;
+  background-color: #282c34;
+  text-align: center;
+  align-items: center;
+}
+.parteSuperior{
+  margin: 10px;
+}
 
 
 
