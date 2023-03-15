@@ -4,14 +4,22 @@ import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import CardGroup from 'react-bootstrap/CardGroup';
 import Accordion from 'react-bootstrap/Accordion';
+import PTC from '../asserts/images/PTC.jpg';
 
 function Home(){
     return(
         <>
 
-<label className="Titulos">
-    PTC 
-</label>
+    
+    
+    <div className="App">
+       <label className="Titulos">
+       PALLET, TARIMAS Y CAJONES, S.A DE C.V.
+      </label>
+         <img className="App-logo" src={PTC} alt="React Logo" />
+
+    </div>
+
         <Accordion defaultActiveKey="0">
       <Accordion.Item eventKey="0">
         <Accordion.Header>¿Quiénes somos?</Accordion.Header>
@@ -60,7 +68,7 @@ function Home(){
     Tipos de Tarimas que manejamos 
     </label>
 
-
+    <Card.Img variant="top" src="/public/PTC.jpeg" />
 
        <CardGroup>
       <Card>

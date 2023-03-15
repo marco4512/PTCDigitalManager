@@ -1,10 +1,10 @@
 .App {
   text-align: center;
+
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  height: 300px;
 }
 
 .home {
@@ -57,7 +57,7 @@
   width: 95%;
   text-align: center;
   color: black;
-  font-size: 2cm;
+  font-size: 1.5cm;
   font-family:'Times New Roman', Times, serif;
 }
 
@@ -152,12 +152,6 @@
 }
 
 
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .App-header {
   background-color: #282c34;
