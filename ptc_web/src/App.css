@@ -1,10 +1,10 @@
 .App {
   text-align: center;
+
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  height: 200px;
 }
 
 .home {
@@ -12,17 +12,27 @@
 }
 
 .navBar {
-  width: 100vw;
-  background-color: #282c34;
-  height: 100px;
+  width: 100%;
+  background-color: #0D0D0D;
+  height: 95px;
   display: flex;
+  font-family: 'Alata', sans-serif;
+  padding: 5px;
+}
+
+.HomeContainer {
+  width: 95%;
+  margin: 0 auto;
+  background-color: #F2F2F2;
 }
 
 .LogoEmpresa {
   width: 25%;
   height: 98%;
-  border: 1px solid black;
-  background-image: url(../);
+  background-image: url(./asserts/images/LogParaNav.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .Separador {
@@ -52,26 +62,6 @@
   color: red;
 }
 
-#inventarioNav {
-  display: none;
-}
-
-#pedidoNav {
-  display: none;
-}
-
-#productosNav {
-  display: none;
-}
-
-#reportesNav {
-  display: none;
-}
-
-#panelPrincipalNav {
-  display: none;
-}
-
 
 .Titulologinpas {
   width: 95%;
@@ -81,11 +71,10 @@
 }
 
 .Titulos {
-  width: 95%;
   text-align: center;
   color: black;
-  font-size: 2cm;
-  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.2cm;
+  font-family: 'Alata', sans-serif;
 }
 
 .SubTitulos {
@@ -113,13 +102,27 @@
   margin-left: 5px;
   border-radius: 10px;
   color: white;
-  background-color: #282c34;
+  background-color: #0D0D0D;
   transition: all 1.5s;
   position: relative;
 }
 
+.buttonOpcion2 {
+  text-align: center;
+  align-items: center;
+  border: none;
+  border-color: none;
+  font-size: 20px;
+  height: 50px;
+  color: #0D0D0D;
+  background-color: #0D0D0D;
+  transition: all 1.5s;
+  margin: 10px;
+}
+
 .debajo {
-  background-color: #F1C40F;
+  background: rgb(13, 13, 13);
+  background: linear-gradient(0deg, rgba(13, 13, 13, 1) 90%, rgba(241, 196, 15, 1) 90%);
   width: 190%;
   height: 1px;
   position: absolute;
@@ -132,11 +135,31 @@
   font-size: 25px;
   opacity: .9;
   transition: all 1.3s;
+  text-decoration: underline;
+}
+
+.buttonOpcion2:hover {
+  opacity: .7;
+  transition: all 1.3s;
+  background: rgb(241, 196, 15);
+  background: linear-gradient(0deg, rgba(241, 196, 15, 1) 11%, rgba(13, 13, 13, 1) 11%);
+}
+
+.NavTemporal {
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+  height: 60px;
+  background-color: #0D0D0D;
+}
+
+.containerPanelPrincipal {
+  width: 100%;
 
 }
 
 .formularioXD {
-  width: 30%;
+  width: 20%;
   margin: 0 auto;
   border-radius: 10px;
   padding: 20px;
@@ -162,7 +185,7 @@
   margin: 0 auto;
   padding-top: 5%;
   height: 100vh;
-  background-color: #A4ACA8;
+  background-color: #F2F2F2;
 }
 
 .form_login {
@@ -179,12 +202,6 @@
 }
 
 
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .App-header {
   background-color: #282c34;

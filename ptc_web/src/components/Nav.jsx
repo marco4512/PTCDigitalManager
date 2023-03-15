@@ -30,12 +30,8 @@ function Nav() {
                 <div className="Separador">
                 </div>
                 <div className="PartesPagina">
-                    <button onClick={login} className="buttonOpcion">Login</button>
-                    <button onClick={inventario}     id="inventarioNav" className="buttonOpcion">Inventario</button>
-                    <button onClick={Pedido}         id="pedidoNav" className="buttonOpcion">Pedido</button>
-                    <button onClick={Productos}      id="productosNav" className="buttonOpcion">Productos</button>
-                    <button onClick={Reportes}       id="reportesNav" className="buttonOpcion">Reportes</button>
-                    <button onClick={PanelPrincipal} id="panelPrincipalNav" className="buttonOpcion">PanelPrincipal</button>
+                    <button onClick={login} id="Login" className="buttonOpcion">Login</button>
+                    
                 </div>
             </div>
         </>

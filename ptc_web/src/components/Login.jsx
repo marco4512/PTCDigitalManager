@@ -23,11 +23,7 @@ function Login(props) {
   }
   const Login = async (e) => {
     var error = document.getElementById('ErrorLogin');
-    var inventarioNav = document.getElementById('inventarioNav');
-    var pedidoNav = document.getElementById('pedidoNav');
-    var productosNav = document.getElementById('productosNav');
-    var reportesNav = document.getElementById('reportesNav');
-    var panelPrincipalNav = document.getElementById('panelPrincipalNav');
+
     try {
       var emailDesdeFirebase='';
       var allUserData;
@@ -35,8 +31,10 @@ function Login(props) {
       await signInWithEmailAndPassword(getAuth(), values_login.email2.toLowerCase(), values_login.password2)
         .then((usuarioFirebase) => {
           props.setUsuario(usuarioFirebase);
+          navigate('/principal')
         });
     } catch (e) {
+      console.log(e)
       error.style.display = 'block';
       error.style.color='red';
     }
