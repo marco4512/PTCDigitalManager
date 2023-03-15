@@ -14,10 +14,10 @@
 .navBar {
   width: 100%;
   background-color: #0D0D0D;
-  height: 95px;
+  height: 90px;
   display: flex;
   font-family: 'Alata', sans-serif;
-  padding: 5px;
+  align-items: center;
 }
 
 .HomeContainer {
@@ -27,12 +27,13 @@
 }
 
 .LogoEmpresa {
-  width: 25%;
-  height: 98%;
+  width: 20%;
+  height: 75%;
   background-image: url(./asserts/images/LogParaNav.png);
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
+
 }
 
 .Separador {

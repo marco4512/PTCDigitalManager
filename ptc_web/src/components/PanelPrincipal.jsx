@@ -56,12 +56,20 @@ function PanelPrincipal(props) {
         querySnapshot.forEach((doc) => {
             switch (doc.data().rol) {
                 case 'Admin':
-                    inventarioNav.style.color='white';
+                    inventarioNav.style.color="white";
                     Pedido.style.color="white";
                     productosNav.style.color="white";
                     reportesNav.style.color="white";
+                    panelPrincipalNav.style.color="white";
+                    break
+                case 'Asistente':
+                    inventarioNav.style.color="white";
+                    Pedido.style.color="white";
+                    productosNav.style.color="white";
+                    reportesNav.style.display="none";
                     panelPrincipalNav.style.display="none";
                     break
+
             }
         });
     }
