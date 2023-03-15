@@ -22,6 +22,7 @@
   width: 25%;
   height: 98%;
   border: 1px solid black;
+  background-image: url(../);
 }
 
 .Separador {
@@ -42,31 +43,57 @@
   width: 95%;
   text-align: center;
   color: white;
-  font-size:larger;
+  font-size: larger;
 
 }
+
+.colores {
+  display: none;
+  color: red;
+}
+
+#inventarioNav {
+  display: none;
+}
+
+#pedidoNav {
+  display: none;
+}
+
+#productosNav {
+  display: none;
+}
+
+#reportesNav {
+  display: none;
+}
+
+#panelPrincipalNav {
+  display: none;
+}
+
 
 .Titulologinpas {
   width: 95%;
   text-align: center;
   color: white;
-  font-size:larger;
+  font-size: larger;
 }
 
-.Titulos{
+.Titulos {
   width: 95%;
   text-align: center;
   color: black;
   font-size: 2cm;
-  font-family:'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
 }
 
-.SubTitulos{
+.SubTitulos {
   width: 95%;
   text-align: center;
-  color:#7f8682;
+  color: #7f8682;
   font-size: 1cm;
-  font-family:'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .BotonLogin {
@@ -113,12 +140,12 @@
   margin: 0 auto;
   border-radius: 10px;
   padding: 20px;
-  background: rgba( 0, 0, 0, 0.8 );
-  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-  backdrop-filter: blur( 7.5px );
-  -webkit-backdrop-filter: blur( 7.5px );
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(7.5px);
+  -webkit-backdrop-filter: blur(7.5px);
   border-radius: 10px;
-  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border: 1px solid rgba(255, 255, 255, 0.18);
 
 }
 

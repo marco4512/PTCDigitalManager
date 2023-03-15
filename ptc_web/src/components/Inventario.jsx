@@ -1,5 +1,6 @@
 import { React, useState } from "react";
 import { doc, getDocs, getFirestore, collection } from "firebase/firestore";
+
 function Inventario() {
     const db = getFirestore();
     const [inventario,setInventario]=useState(0);
