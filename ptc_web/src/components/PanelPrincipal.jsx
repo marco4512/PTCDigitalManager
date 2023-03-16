@@ -2,6 +2,7 @@ import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { query, where, getDocs, getFirestore, collection } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+
 function PanelPrincipal(props) {
     const navigate = useNavigate();
     const [email, setEmail] = useState(false);
