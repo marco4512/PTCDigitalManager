@@ -86,8 +86,72 @@ function Inventario(props) {
                 <button onClick={Reportes} id="reportesNav" className="buttonOpcion2">Reportes</button>
                 <button onClick={PanelPrincipal} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
             </div>
-            <h1 className="home">Inventario</h1>
-        </>
+            <h1 className="Titulos">Inventario</h1>
+
+            <div className="Botoninv">
+            <button class="btn btn-primary " type="button">Agregar producto</button>
+            <button class="btn btn-primary" type="button">Editar producto</button>
+            </div>
+            
+            
+            <table class="table table-bordered border border-secondary">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Dimension</th>
+                <th scope="col">Volumen</th>
+                <th scope="col">Existencia</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Espacio en Almacen</th>
+                <th scope="col">Valor Inventario</th>
+                <th scope="col">Fecha Entrada</th>
+                <th scope="col">Fecha Salida</th>
+                <th scope="col">Proveedor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                </tr>
+                <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                </tr>
+                <tr>
+                <th scope="row">3</th>
+                <td>Larry the Bird</td>
+                <td>@twitter</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                </tr>
+            </tbody>
+            </table>
+                    </>
     );
 }
 export default Inventario;
