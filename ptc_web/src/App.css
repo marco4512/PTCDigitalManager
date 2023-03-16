@@ -43,6 +43,13 @@
 
 }
 
+.separaciones{
+  padding: 15px;
+  padding-bottom: 15px;
+  height: 50px;
+  margin-top: 25px;
+  margin-left: 5px;
+}
 .PartesPagina {
   width: 65%;
   text-align: right;
@@ -90,6 +97,16 @@
 .BotonLogin {
   text-align: center;
 }
+
+.Botoninv {
+  text-align: center;
+  padding-bottom: 15px;
+}
+
+.Botoninv button {
+margin: 10px;
+}
+
 
 .buttonOpcion {
   text-align: center;
