@@ -14,6 +14,7 @@ function Home() {
           <label className="Titulos">
             PALLET, TARIMAS Y CAJONES, S.A DE C.V.
           </label>
+          <br />
           <img className="App-logo" src={PTC} alt="React Logo" />
 
         </div>
