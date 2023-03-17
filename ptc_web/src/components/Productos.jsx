@@ -4,10 +4,25 @@ import { query, where, getDocs, doc, getFirestore, collection, setDoc } from "fi
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import { async } from "@firebase/util";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 function Productos(props) {
 
-
+    const [dimension, setDimension] = useState();
+    const [material, setMaterial] = useState();
+    const [nombre, setNombre] = useState();
+    const [volumen, setVolumen] = useState();
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+    const [show2, setShow2] = useState(false);
+    const handleClose2 = () => setShow2(false);
+    const handleShow2 = () => setShow2(true);
+    const [show3, setShow3] = useState(false);
+    const handleClose3 = () => setShow3(false);
+    const handleShow3 = () => setShow3(true);
+    const [dataOf, setDataOf] = useState([])
     const navigate = useNavigate();
     const [email, setEmail] = useState(false);
     const [primera_vez, setPrimera_vez] = useState(false);
@@ -28,8 +43,40 @@ function Productos(props) {
     const PanelPrincipal = () => {
         navigate('/principal')
     }
+    function ChangeDimension(event) {
+        setDimension(event.target.value);
+    }
+    function ChangeMaterial(event) {
+        setMaterial(event.target.value);
+    }
+    function ChangeNombre(event) {
+        setNombre(event.target.value);
+    }
+    function ChangeVolumen(event) {
+        setVolumen(event.target.value);
+    }
+    const [productosAgregar, setProductosAgregar] = useState([{
+        'Dimension': '',
+        'Material': '',
+        'Nombre': '',
+        'Volumen': ''
+    }])
+    function AñadirFila() {
+        handleClose3();
+        productosAgregar.push({
+            'Dimension': '',
+            'Material': '',
+            'Nombre': '',
+            'Volumen': ''
+        })
+        const timer = setTimeout(() => {
+            handleShow3();
+          }, .1);
+   
+    }
 
     useEffect(() => {
+
         let NavTemporal = document.getElementById('NavTemporal');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
@@ -43,6 +90,7 @@ function Productos(props) {
                     setPrimera_vez(true);
                     ObtenerNav(usuarioFirebase.email)
                     ExtraerProductos()
+                    console.log('sin nada', productosAgregar)
                 }
                 if (primera_vez) {
                     console.log('ya se cargo');
@@ -52,6 +100,12 @@ function Productos(props) {
             props.setUsuario(usuarioFirebase);
         });
     }, []);
+
+
+
+
+
+
 
     async function ObtenerNav(email) {
         var inventarioNav = document.getElementById('inventarioNav');
@@ -92,37 +146,233 @@ function Productos(props) {
         console.log('Los Productos', productos)
 
     }
+    var db = getFirestore();
+    async function eliminarProducto(data, bandera) {
+        if (bandera) {
+            console.log(data)
+            setDataOf(data)
+            handleShow()
+        } else {
+            handleClose()
 
-    async function eliminarProducto(data) {
-        let db = getFirestore();
-        const querySnapshot = await getDocs(collection(db, "Productos"));
-        querySnapshot.forEach((documento) => {
-            let Finales = []
-            documento.data()['Productos'].map(function (producto) {
-                let arregloFirebase = Object.values(producto).sort();
-                let arregloActual = Object.values(data).sort();
-                if (String(arregloFirebase) != String(arregloActual)) {
-                    Finales.push(producto)
-                }
-            })
-            const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
-            let dataEnviar = { 'Productos': Finales }
-            setDoc(docRef, dataEnviar).then(docRef => {
-                console.log("Entire Document has been updated successfully");
-                window.location.reload()
-            }).catch(error => {
+            const querySnapshot = await getDocs(collection(db, "Productos"));
+            querySnapshot.forEach((documento) => {
+                let Finales = []
+                documento.data()['Productos'].map(function (producto) {
+                    let arregloFirebase = Object.values(producto).sort();
+                    let arregloActual = Object.values(data).sort();
+                    if (String(arregloFirebase) != String(arregloActual)) {
+                        Finales.push(producto)
+                    }
+                })
+                const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
+                let dataEnviar = { 'Productos': Finales }
+                setDoc(docRef, dataEnviar).then(docRef => {
+                    console.log("Entire Document has been updated successfully");
+                    ExtraerProductos().then(x => x)
+                }).catch(error => {
                     console.log(error);
                 })
-            console.log('salida->', Finales)
-        });
+                console.log('salida->', Finales)
+            });
+        }
+    }
+    async function editarProducto(data, bandera) {
+        if (bandera) {
+            console.log('datos', data)
+            setDataOf(data)
+            setDimension(data['Dimension'])
+            setMaterial(data['Material'])
+            setNombre(data['Nombre'])
+            setVolumen(data['Volumen'])
+            handleShow2()
+        } else {
+            if (data['Dimension'] == dimension && data['Material'] == material && data['Nombre'] == nombre && data['Volumen'] == volumen) {
+                console.log('No se edito nada')
+                handleClose2()
+            } else {
+                var productoEditado = {
+                    Nombre: nombre,
+                    Volumen: volumen,
+                    Dimension: dimension,
+                    Material: material
+                }
+                const querySnapshot = await getDocs(collection(db, "Productos"));
+                querySnapshot.forEach((documento) => {
+                    let Finales = []
+                    documento.data()['Productos'].map(function (producto) {
+                        let arregloFirebase = Object.values(producto).sort();
+                        let arregloActual = Object.values(data).sort();
+                        console.log(arregloFirebase, arregloActual)
+                        if (String(arregloFirebase) != String(arregloActual)) {
+                            Finales.push(producto)
+                        }
+                    })
+                    handleClose2()
+                    Finales.push(productoEditado)
+                    const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
+                    let dataEnviar = { 'Productos': Finales }
+                    setDoc(docRef, dataEnviar).then(docRef => {
+                        console.log("Entire Document has been updated successfully");
+                        ExtraerProductos().then(x => x)
+
+                    }).catch(error => {
+                        console.log(error);
+                    })
+                    console.log('salida->', Finales)
+                })
+                console.log('Anterior', data)
+                console.log('Nuevo', dimension, '-', material, '-', nombre, '-', volumen)
+
+            }
+        }
+
 
     }
-    function editarProducto(data) {
-        console.log('datos', data)
-
+    function eliminarFila(index,data){
+        handleClose3();
+        data.splice(index, 1)
+        console.log('index : ',index)
+        console.log('data :',data)
+        setProductosAgregar(data)
+        const timer = setTimeout(() => {
+            handleShow3();
+          }, .1);
     }
+    function onChangeDimension(event){
+        handleClose3();
+        let valor=event.target.value;
+        let indice=event.target.name;
+        productosAgregar[indice]['Dimension']=productosAgregar[indice]['Dimension']+valor;
+        setProductosAgregar(productosAgregar)
+        const timer = setTimeout(() => {
+            handleShow3();
+          }, .001);
+    }
+
+
     return (
         <>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header className="TituloEliminar" closeButton>
+                    <Modal.Title>Eliminar Producto</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >¿Estas Seguro que quieres eliminar este Producto?
+                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                        <thead>
+                            <tr>
+                                <th>Dimension</th>
+                                <th>Material</th>
+                                <th>Nombre</th>
+                                <th>Volumen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                <tr className="centrarfila">
+                                    <td key={1} >{dataOf['Dimension']}</td>
+                                    <td key={2} >{dataOf['Material']}</td>
+                                    <td key={2} >{dataOf['Nombre']}</td>
+                                    <td key={3} >{dataOf['Volumen']}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { eliminarProducto(dataOf, false) }}>
+                        Eliminar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal size="lg" centered show={show2} onHide={handleClose2}>
+                <Modal.Header className="TituloEditar" closeButton>
+                    <Modal.Title>Editar Producto</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >Ingresa los nuevos campos de tu producto
+                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                        <thead>
+                            <tr>
+                                <th>Dimension</th>
+                                <th>Material</th>
+                                <th>Nombre</th>
+                                <th>Volumen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+
+                                <tr className="centrarfila">
+                                    <td key={1} ><input className="inputEditar" required type="text" onChange={ChangeDimension} value={dimension} /></td>
+                                    <td key={2} ><input className="inputEditar" required type="text" onChange={ChangeMaterial} value={material} /></td>
+                                    <td key={2} ><input className="inputEditar" required type="text" onChange={ChangeNombre} value={nombre} /></td>
+                                    <td key={3} ><input className="inputEditar" required type="text" onChange={ChangeVolumen} value={volumen} /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose2}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { editarProducto(dataOf, false) }}>
+                        GuardarCambios
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
+                <Modal.Header className="TituloProductosNuevos" closeButton>
+                    <Modal.Title>Agregar Productos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >
+                    <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
+                    <div className="tablaAgregarProductos">
+                        <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
+                            <thead>
+                                <tr>
+                                    <th>Dimension</th>
+                                    <th>Material</th>
+                                    <th>Nombre</th>
+                                    <th>Volumen</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            {
+                            productosAgregar.map((keys,index) =>
+                             <tbody>
+                                 <tr className="centrarfila">
+                                     <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
+                                     <td key={2} ><input className="inputEditar" required type="text" value={keys['Material']} /></td>
+                                     <td key={3} ><input className="inputEditar" required type="text" value={keys['Nombre']} /></td>
+                                     <td key={4} ><input className="inputEditar" required type="text" value={keys['Volumen']} /></td>
+                                     <div className="accionAtomar">
+                                         <button id="cancelarButton" onClick={()=>eliminarFila(index,productosAgregar)} >X</button>
+                                     </div>
+                                 </tr>
+                             </tbody>
+                         )
+                            }
+                        </Table>
+                        <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose3}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { editarProducto(dataOf, false) }}>
+                        Registrar Productos
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             <div id="NavTemporal" className="NavTemporal">
                 <button onClick={inventario} id="inventarioNav" className="buttonOpcion2">Inventario</button>
                 <button onClick={Pedido} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
@@ -136,7 +386,7 @@ function Productos(props) {
             </div>
             <div className="contenidoTotal">
                 <div className="TablaCont">
-                    <Table striped bordered hover className="tablaProductos">
+                    <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
                                 <th>Dimension</th>
@@ -155,8 +405,8 @@ function Productos(props) {
                                         <td key={number.id} >{number['Nombre']}</td>
                                         <td key={number.id} >{number['Volumen']}</td>
                                         <div className="accionAtomar">
-                                            <button id="cancelarButton" onClick={() => { eliminarProducto(number) }} >X</button>
-                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProducto(number) }}><span > edit </span></button>
+                                            <button id="cancelarButton" onClick={() => { eliminarProducto(number, true) }} >X</button>
+                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProducto(number, true) }}><span > edit </span></button>
                                         </div>
                                     </tr>
                                 )
@@ -173,7 +423,7 @@ function Productos(props) {
                     <br />
                     <br />
                     <div className="ButtonesAgregarProducto">
-                        <button id="NuevoProducto" >Agregar NuevoProducto</button>
+                        <button id="NuevoProducto" onClick={handleShow3} >Agregar Productos</button>
                         <button id="DesdeSheet">Agregar desde Sheet</button>
                     </div>
                 </div>
