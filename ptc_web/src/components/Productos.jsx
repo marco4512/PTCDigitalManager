@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from "react";
 import { json, useNavigate } from 'react-router-dom';
-import { query, where, getDocs, doc, getFirestore, collection, setDoc } from "firebase/firestore";
+import { query, where, getDocs, doc, getFirestore, collection, setDoc, updateDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import { async } from "@firebase/util";
@@ -62,21 +62,17 @@ function Productos(props) {
         'Volumen': ''
     }])
     function AñadirFila() {
-        handleClose3();
-        productosAgregar.push({
+        //handleClose3();
+        let nuevaData = {
             'Dimension': '',
             'Material': '',
             'Nombre': '',
             'Volumen': ''
-        })
-        const timer = setTimeout(() => {
-            handleShow3();
-          }, .1);
-   
+        }
+        setProductosAgregar([...productosAgregar, nuevaData])
     }
 
     useEffect(() => {
-
         let NavTemporal = document.getElementById('NavTemporal');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
@@ -100,13 +96,6 @@ function Productos(props) {
             props.setUsuario(usuarioFirebase);
         });
     }, []);
-
-
-
-
-
-
-
     async function ObtenerNav(email) {
         var inventarioNav = document.getElementById('inventarioNav');
         var Pedido = document.getElementById('pedidoNav');
@@ -135,9 +124,42 @@ function Productos(props) {
             }
         });
     }
+    async function UpdateProductos() {
+
+        const querySnapshot = await getDocs(collection(db, "Productos"));
+        querySnapshot.forEach((documento) => {
+            let Finales = []
+            documento.data()['Productos'].map(function (producto) {
+                Finales.push(producto)
+            })
+            productosAgregar.map((fila) => Finales.push(fila))
+            const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
+            let dataEnviar = { 'Productos': Finales }
+            setDoc(docRef, dataEnviar).then(docRef => {
+                console.log("Entire Document has been updated successfully");
+                ExtraerProductos().then(function (x) {
+                    setProductosAgregar([{
+                        'Dimension': '',
+                        'Material': '',
+                        'Nombre': '',
+                        'Volumen': ''
+                    }])
+                    handleClose3()
+                })
+            }).catch(error => {
+                console.log(error);
+            })
+            //console.log('salida->', Finales)
+        })
+
+    }
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
 
     async function ExtraerProductos() {
-
         let db = getFirestore();
         const querySnapshot = await getDocs(collection(db, "Productos"));
         querySnapshot.forEach((doc) => {
@@ -229,28 +251,51 @@ function Productos(props) {
 
 
     }
-    function eliminarFila(index,data){
+    function eliminarFila(index, data) {
         handleClose3();
         data.splice(index, 1)
-        console.log('index : ',index)
-        console.log('data :',data)
+        console.log('index : ', index)
+        console.log('data :', data)
+        //setProductosAgregar([...data,data])
         setProductosAgregar(data)
         const timer = setTimeout(() => {
             handleShow3();
-          }, .1);
-    }
-    function onChangeDimension(event){
-        handleClose3();
-        let valor=event.target.value;
-        let indice=event.target.name;
-        productosAgregar[indice]['Dimension']=productosAgregar[indice]['Dimension']+valor;
-        setProductosAgregar(productosAgregar)
-        const timer = setTimeout(() => {
-            handleShow3();
-          }, .001);
+        }, .1);
     }
 
-
+    function onChangeDimension(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        console.log('Este es el indice', indice)
+        console.log(productosAgregar)
+        productosAgregar[indice]['Dimension'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeMaterial(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        console.log('Este es el indice', indice)
+        productosAgregar[indice]['Material'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeNombre(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        console.log('Este es el indice', indice)
+        productosAgregar[indice]['Nombre'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeVolumen(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        console.log('Este es el indice', indice)
+        productosAgregar[indice]['Volumen'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    const filteredData = productos.filter((row) =>
+        row.Nombre.toLowerCase().trim().replaceAll(' ','').includes(searchTerm.toLowerCase().trim().replaceAll(' ',''))||
+        row.Dimension.toLowerCase().trim().replaceAll(' ','').includes(searchTerm.toLowerCase().trim().replaceAll(' ',''))
+    );
     return (
         <>
 
@@ -262,7 +307,7 @@ function Productos(props) {
                     <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Dimension</th>
+                                <th>Dimensión</th>
                                 <th>Material</th>
                                 <th>Nombre</th>
                                 <th>Volumen</th>
@@ -299,7 +344,7 @@ function Productos(props) {
                     <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Dimension</th>
+                                <th>Dimensión</th>
                                 <th>Material</th>
                                 <th>Nombre</th>
                                 <th>Volumen</th>
@@ -337,7 +382,7 @@ function Productos(props) {
                         <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
                             <thead>
                                 <tr>
-                                    <th>Dimension</th>
+                                    <th>Dimensión</th>
                                     <th>Material</th>
                                     <th>Nombre</th>
                                     <th>Volumen</th>
@@ -346,19 +391,19 @@ function Productos(props) {
                                 </tr>
                             </thead>
                             {
-                            productosAgregar.map((keys,index) =>
-                             <tbody>
-                                 <tr className="centrarfila">
-                                     <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
-                                     <td key={2} ><input className="inputEditar" required type="text" value={keys['Material']} /></td>
-                                     <td key={3} ><input className="inputEditar" required type="text" value={keys['Nombre']} /></td>
-                                     <td key={4} ><input className="inputEditar" required type="text" value={keys['Volumen']} /></td>
-                                     <div className="accionAtomar">
-                                         <button id="cancelarButton" onClick={()=>eliminarFila(index,productosAgregar)} >X</button>
-                                     </div>
-                                 </tr>
-                             </tbody>
-                         )
+                                productosAgregar.map((keys, index) =>
+                                    <tbody>
+                                        <tr className="centrarfila">
+                                            <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
+                                            <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
+                                            <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
+                                            <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
+                                            <div className="accionAtomar">
+                                                <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
+                                            </div>
+                                        </tr>
+                                    </tbody>
+                                )
                             }
                         </Table>
                         <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
@@ -368,7 +413,7 @@ function Productos(props) {
                     <Button variant="secondary" onClick={handleClose3}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={() => { editarProducto(dataOf, false) }}>
+                    <Button variant="primary" onClick={() => { UpdateProductos() }}>
                         Registrar Productos
                     </Button>
                 </Modal.Footer>
@@ -389,7 +434,7 @@ function Productos(props) {
                     <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Dimension</th>
+                                <th>Dimensión</th>
                                 <th>Material</th>
                                 <th>Nombre</th>
                                 <th>Volumen</th>
@@ -398,7 +443,7 @@ function Productos(props) {
                         </thead>
                         <tbody>
                             {
-                                productos.map((number) =>
+                                filteredData.map((number) =>
                                     <tr className="centrarfila">
                                         <td key={number.id} >{number['Dimension']}</td>
                                         <td key={number.id} >{number['Material']}</td>
@@ -418,7 +463,7 @@ function Productos(props) {
                     <p className="tituloProductoAmin">Administración de los productos</p>
                     <div className="group">
                         <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
-                        <input placeholder="Search" type="search" className="input" />
+                        <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
                     </div>
                     <br />
                     <br />
