@@ -81,7 +81,7 @@ function PanelPrincipal(props) {
                 <div id="NavTemporal" className="NavTemporal">
                     <button onClick={inventario} id="inventarioNav" className="buttonOpcion2">Inventario</button>
                     <button onClick={Pedido} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                    <button onClick={Productos} id="productosNav" className="buttonOpcion2">Productos</button>
+                    <button onClick={Productos} id="productosNav" className="buttonOpcion2">Materiales</button>
                     <button onClick={Reportes} id="reportesNav" className="buttonOpcion2">Reportes</button>
                     <button onClick={PanelPrincipal} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
                 </div>
