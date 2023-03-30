@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { query, where, getDocs, doc, getFirestore, collection, setDoc,  } from "firebase/firestore";
-import { getAuth} from "firebase/auth";
+import { query, where, getDocs, doc, getFirestore, collection, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -37,6 +37,7 @@ function Productos(props) {
     var containerPrincial = document.getElementById('containerPrincial');
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
+    const inventarioRef = collection(db, "Inventario");
     function Navegar(lugar) {
         navigate(`/${lugar}`)
     }
@@ -66,7 +67,7 @@ function Productos(props) {
     }
 
     useEffect(() => {
-        
+
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
                 containerPrincial.style.display = 'none';
@@ -126,6 +127,7 @@ function Productos(props) {
             let dataEnviar = { 'Productos': Finales }
             setDoc(docRef, dataEnviar).then(docRef => {
                 //console.log("Entire Document has been updated successfully");
+                UpdateInventario()
                 ExtraerProductos().then(function (x) {
                     setProductosAgregar(filaVacia)
                     handleClose3()
@@ -140,6 +142,58 @@ function Productos(props) {
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
     };
+
+
+    async function UpdateInventario() {
+        const Productos = [
+            { nombre: "NOMBRE3", dimension: "DIMENSION3", volumen: "VOL3" },
+            { nombre: "NOMBRE4", dimension: "DIMENSION4", volumen: "VOL4" }
+        ];
+
+        // Obtener una referencia a la colección
+
+        // Obtener el número total de documentos en la colección
+        const querySnapshot = await getDocs(inventarioRef);
+        const totalDocumentos = querySnapshot.size;
+
+        // Obtener el último ID disponible en la colección
+
+        // Insertar los documentos en la colección
+        for (let i = 0; i < Productos.length; i++) {
+            const producto = Productos[i];
+
+            const id = totalDocumentos + i + 1; // Generar el ID incremental a partir del último ID disponible
+            const documento = { // Crear el objeto con los datos del producto
+                Dimension: producto.dimension,
+                EspacioEnAlmacen: "0",
+                Existencia: "0",
+                FechaEntrada: "",
+                FechaSalida: "",
+                Nombre: producto.nombre,
+                Precio: "0",
+                Proveedor: "",
+                ValorInventario: "0",
+                Volumen: producto.volumen,
+                Estatus: "true"
+            };
+            const documentoRef = await inventarioRef.set(documento);
+            // setDoc(inventarioRef, dataEnviar).then(docRef => {
+            //     //console.log("Entire Document has been updated successfully");
+            //     UpdateInventario()
+            //     ExtraerProductos().then(function (x) {
+            //         setProductosAgregar(filaVacia)
+            //         handleClose3()
+            //     })
+            // }).catch(error => {
+            //     console.log(error);
+            // })
+
+            console.log(`El documento se insertó correctamente con el ID: ${documentoRef.id}`);
+            console.log(`El producto con ID ${id} se ha insertado correctamente.`);
+        }
+    }
+
+
 
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Productos"));
