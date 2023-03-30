@@ -26,7 +26,14 @@
   overflow: scroll;
   border-right: 2px solid #ABB2B9;
 }
-
+.TablaContInven {
+  width: 95%;
+  height: 65vh;
+  padding: 10px;
+  text-align: center;
+  overflow: scroll;
+  margin: 0 auto;
+}
 .tablaProductos {
   border-radius: 10px;
 }
@@ -431,6 +438,11 @@ margin: 10px;
 #editarButton {
   background-color: #7DCEA0;
 }
+#editarButton2{
+  background-color: #2980B9;
+  Fill: 0;
+  color: #c4ccc8;
+}
 #editarButton:hover{
   -webkit-transform-origin: top center;
   -ms-transform-origin: top center;
@@ -607,3 +619,20 @@ input:hover {
   transform: rotate3d(0, 0, 1, 0deg);
   }
   }
+.InventarioTop{
+  align-items:center;
+  text-align: center;
+  display: flex;
+  margin: 0 auto;
+  padding: 5px;
+  justify-content:right;
+}
+.tituloInve{
+  text-align: center;
+  width: 65%;
+}
+
+.serch{
+  padding-top: 5px;
+  width: 30%;
+}
