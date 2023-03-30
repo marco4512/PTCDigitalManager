@@ -141,9 +141,11 @@ function Inventario(props) {
 
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
+
         querySnapshot.forEach((doc) => {
-            setProductos(doc.data().Inventario)
+            setProductos(doc.data())
         });
+
     }
 
     async function eliminarMejorado(data, bandera, indice) {
