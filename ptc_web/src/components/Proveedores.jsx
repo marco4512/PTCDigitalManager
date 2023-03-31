@@ -1,16 +1,17 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { query, where, getDocs, doc, getFirestore, collection, setDoc, updateDoc, } from "firebase/firestore";
+import { query, where, getDocs, doc, getFirestore, collection, setDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-function Inventario(props) {
-    const [Existencia, setExistencia] = useState('');
-    const [Precio, setPrecio] = useState();
-    const [Fecha_ent, setFecha_ent] = useState();
-    const [Proveedor, setProveedor] = useState();
-    const [arregloPro, setArregloPro] = useState([]);
+
+function Proveedores(props) {
+
+    const [Nombre, setNombre] = useState();
+    const [Encargado, setEncargado] = useState();
+    const [Contacto, setContacto] = useState();
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -28,61 +29,33 @@ function Inventario(props) {
     const [productos, setProductos] = useState([]);
     var filaVacia = [{
         'Dimension': '',
-        'Material': '',
         'Nombre': '',
         'Volumen': ''
     }]
-    function onchangeSelect(event) {
-        let value = event.target.value;
-        if (value != 'Selecciona uno') {
-            setProveedor(value)
-        }
-    }
     const [productosAgregar, setProductosAgregar] = useState(filaVacia)
     var containerPrincial = document.getElementById('containerPrincial');
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
+    const inventarioRef = collection(db, "Proveedores");
     function Navegar(lugar) {
         navigate(`/${lugar}`)
     }
+
     function onChangeEditar(event) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
-            case 'Existencia':
-                if (/^[0-9]*$/.test(event.target.value)) {
-                    setExistencia(event.target.value);
-                }
+            case 'Nombre':
+                setNombre(event.target.value);
                 break
-            case 'Precio':
-                if (/^[0-9]*\.?[0-9]*$/.test(event.target.value)) {
-                    setPrecio(event.target.value);
-                    console.log("El valor es válido");
-                }
+            case 'Encargado':
+                setEncargado(event.target.value);
                 break
-            case 'FechaEntrada':
-                setFecha_ent(event.target.value);
-                break
-            case 'Proveedor':
-                setProveedor(event.target.value);
+            case 'Contacto':
+                setContacto(event.target.value);
                 break
             default:
                 break;
         }
-    }
-    async function ExtraerProveedores() {
-        const querySnapshot = await getDocs(collection(db, "Proveedores"));
-        let alldata = []
-        querySnapshot.forEach((doc) => {
-            if (doc.data()['Estatus']) {
-                let data = {
-                    'id': doc.id,
-                    'data': doc.data()
-                }
-                alldata.push(data)
-            }
-
-        });
-        setArregloPro(alldata)
     }
     function AñadirFila() {
         let nuevaData = filaVacia[0]
@@ -99,7 +72,6 @@ function Inventario(props) {
             else {
                 setEmail(usuarioFirebase.email);
                 if (primera_vez == false || productos) {
-                    //console.log('cargando la primera vez')
                     setPrimera_vez(true);
                     ObtenerNav(usuarioFirebase.email)
                     ExtraerProductos()
@@ -118,6 +90,8 @@ function Inventario(props) {
         var productosNav = document.getElementById('productosNav');
         var reportesNav = document.getElementById('reportesNav');
         var panelPrincipalNav = document.getElementById('panelPrincipalNav');
+        var prooveedores = document.getElementById('prooveedores');
+
         const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
@@ -128,6 +102,7 @@ function Inventario(props) {
                     productosNav.style.color = "white";
                     reportesNav.style.color = "white";
                     panelPrincipalNav.style.color = "white";
+                    prooveedores.style.color = "white";
                     break
                 case 'Asistente':
                     inventarioNav.style.color = "white";
@@ -139,17 +114,24 @@ function Inventario(props) {
             }
         });
     }
-    async function UpdateProductos() {
-        const querySnapshot = await getDocs(collection(db, "Productos"));
-        querySnapshot.forEach((documento) => {
-            let Finales = []
-            documento.data()['Productos'].map(function (producto) {
-                Finales.push(producto)
-            })
-            productosAgregar.map((fila) => Finales.push(fila))
-            let dataEnviar = { 'Productos': Finales }
-            setDoc(docRef, dataEnviar).then(docRef => {
-                //console.log("Entire Document has been updated successfully");
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+    async function UpdateInventario() {
+        const querySnapshot = await getDocs(inventarioRef);
+        const totalDocumentos = querySnapshot.size;
+        productosAgregar.map(function (fila, index) {
+            const documento = { 
+                Nombre: fila['Nombre'],
+                Encargado: fila['Encargado'],
+                Contacto: fila['Contacto'],
+                Estatus: true
+            };
+            let indice = totalDocumentos + index;
+            const docRef = doc(db, "Proveedores", String(indice));
+            setDoc(docRef, documento).then(docRef => {
                 ExtraerProductos().then(function (x) {
                     setProductosAgregar(filaVacia)
                     handleClose3()
@@ -158,15 +140,13 @@ function Inventario(props) {
                 console.log(error);
             })
         })
-    }
-    const [searchTerm, setSearchTerm] = useState('');
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
+    }
+
+
 
     async function ExtraerProductos() {
-        const querySnapshot = await getDocs(collection(db, "Inventario"));
+        const querySnapshot = await getDocs(collection(db, "Proveedores"));
         let alldata = []
         querySnapshot.forEach((doc) => {
             if (doc.data()['Estatus']) {
@@ -180,7 +160,6 @@ function Inventario(props) {
         });
         setProductos(alldata)
         console.log(alldata)
-
     }
 
     async function eliminarMejorado(data, bandera, indice) {
@@ -189,17 +168,14 @@ function Inventario(props) {
             setIndexTem(indice)
             setDataOf(data)
             handleShow()
+            console.log(indice)
         } else {
             delete aux[indexTem];
-            //console.log('data :', aux)
-            //const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
-            const emptyIndex = aux.indexOf(undefined);
-            //console.log('undefined', emptyIndex)
-            let formato = { 'Productos': [] }
-            aux.map(x => formato['Productos'].push(x))
-            //console.log(formato)
-            setDoc(docRef, formato).then(docRef => {
-                //console.log("Entire Document has been updated successfully");
+            const data = {
+                Estatus: false
+            };
+            const docRef = doc(db, "Proveedores", String(indexTem));
+            updateDoc(docRef, data).then(docRef => {
                 ExtraerProductos().then(function (x) {
                     handleClose()
                     setIndexTem()
@@ -212,31 +188,25 @@ function Inventario(props) {
     async function editarProductoMejorado(data, bandera, indice) {
         let aux = filteredData;
         if (bandera) {
-            ExtraerProveedores()
             setIndexTem(indice)
-            console.log(indice)
             setDataOf(data)
-            setExistencia(data['Existencia'])
-            setPrecio(data['Precio'])
-            setFecha_ent(data['FechaEntrada'])
-            setProveedor(data['Proveedor'])
+            setNombre(data['Nombre'])
+            setEncargado(data['Encargado'])
+            setContacto(data['Contacto'])
             handleShow2()
 
         } else {
-            if (data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
+            if (data['Nombre'] == Nombre && data['Encargado'] == Encargado && data['Contacto'] == Contacto) {
                 //console.log('No se edito nada')
                 handleClose2()
             } else {
-                console.log(Existencia)
                 var productoEditado = {
-                    Existencia: Existencia != '' ? Existencia : '0',
-                    Precio: Precio != '' ? Precio : '0.0',
-                    FechaEntrada: Fecha_ent,
-                    Proveedor: Proveedor
+                    Nombre: Nombre,
+                    Encargado: Encargado,
+                    Contacto: Contacto
                 }
-                const docRef = doc(db, "Inventario", String(indexTem));
+                const docRef = doc(db, "Proveedores", String(indexTem));
                 updateDoc(docRef, productoEditado).then(docRef => {
-                    //console.log("Entire Document has been updated successfully");
                     ExtraerProductos().then(function (x) {
                         handleClose2()
                         setIndexTem()
@@ -244,8 +214,8 @@ function Inventario(props) {
                 }).catch(error => {
                     console.log(error);
                 })
-            }
 
+            }
 
         }
 
@@ -258,22 +228,6 @@ function Inventario(props) {
             handleShow3();
         }, .1);
     }
-
-    function onChangeDimension(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        //console.log(productosAgregar)
-        productosAgregar[indice]['Dimension'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    function onChangeMaterial(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Material'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
     function onChangeNombre(event) {
         let valor = event.target.value;
         let indice = event.target.name;
@@ -281,54 +235,83 @@ function Inventario(props) {
         productosAgregar[indice]['Nombre'] = valor;
         setProductosAgregar([...productosAgregar])
     }
-    function onChangeVolumen(event) {
+    function onEncargado(event) {
         let valor = event.target.value;
         let indice = event.target.name;
         //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Volumen'] = valor;
+        productosAgregar[indice]['Encargado'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeContacto(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        //console.log('Este es el indice', indice)
+        productosAgregar[indice]['Contacto'] = valor;
         setProductosAgregar([...productosAgregar])
     }
     const filteredData = productos.filter((row) =>
-
         row.data.Nombre.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
-        row.data.Dimension.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
-
-
+        row.data.Encargado.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
+        row.data.Contacto.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
     );
-
-
     return (
         <>
 
-
-            <Modal size="lg" centered show={show2} onHide={handleClose2}>
-                <Modal.Header className="TituloEditar" closeButton>
-                    <Modal.Title>Editar Inventario</Modal.Title>
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header className="TituloEliminar" closeButton>
+                    <Modal.Title>Eliminar Producto</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="bodymodla" >Actualiza tu inventario
+                <Modal.Body className="bodymodla" >¿Estas Seguro que quieres eliminar este Proveedor?
                     <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Existencia</th>
-                                <th>Precio</th>
-                                <th>Fecha ent</th>
-                                <th>Proveedor</th>
+                                <th>Nombre</th>
+                                <th>Encargado</th>
+                                <th>Contacto</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 <tr className="centrarfila">
-                                    <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} pattern="[0-9]*" name='Existencia' value={Existencia} /></td>
-                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Precio' value={Precio} /></td>
-                                    <td key={3} ><input className="inputEditar" required type="date" onChange={onChangeEditar} name='FechaEntrada' /></td>
-                                    <td key={4}>
-                                        <select id="select" onChange={onchangeSelect} name="proveedores">
-                                            <option key={'0.0'} value={''}>Selecciona uno</option>
-                                            {arregloPro.map((fila, indice) =>
-                                                <option key={indice} value={fila['data']['Nombre']}>{fila['data']['Nombre']}</option>
-                                            )}
-                                        </select>
-                                    </td>
+                                    <td key={1} >{dataOf['Nombre']}</td>
+                                    <td key={2} >{dataOf['Encargado']}</td>
+                                    <td key={3} >{dataOf['Contacto']}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { eliminarMejorado(dataOf, false) }}>
+                        Eliminar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal size="lg" centered show={show2} onHide={handleClose2}>
+                <Modal.Header className="TituloEditar" closeButton>
+                    <Modal.Title>Editar Producto</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >Ingresa los nuevos campos de tu Proveedor
+                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Encargado</th>
+                                <th>Contacto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+
+                                <tr className="centrarfila">
+                                    <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Nombre' value={Nombre} /></td>
+                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Encargado' value={Encargado} /></td>
+                                    <td key={3} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Contacto' value={Contacto} /></td>
                                 </tr>
                             }
                         </tbody>
@@ -348,15 +331,14 @@ function Inventario(props) {
                     <Modal.Title>Agregar Productos</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="bodymodla" >
-                    <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
+                    <p className="ingresanuevosprod">Ingresa un nuevo Proveedor</p>
                     <div className="tablaAgregarProductos">
                         <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
                             <thead>
                                 <tr>
-                                    <th>Dimensión</th>
-                                    <th>Material</th>
                                     <th>Nombre</th>
-                                    <th>Volumen</th>
+                                    <th>Encargado</th>
+                                    <th>Contacto</th>
                                     <th>Action</th>
 
                                 </tr>
@@ -365,10 +347,9 @@ function Inventario(props) {
                                 productosAgregar.map((keys, index) =>
                                     <tbody>
                                         <tr className="centrarfila">
-                                            <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
-                                            <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
-                                            <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
-                                            <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
+                                            <td key={1} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
+                                            <td key={3} ><input className="inputEditar" name={index} onChange={onEncargado} required type="text" value={keys['Encargado']} /></td>
+                                            <td key={4} ><input className="inputEditar" name={index} onChange={onChangeContacto} required type="text" value={keys['Contacto']} /></td>
                                             <div className="accionAtomar">
                                                 <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
                                             </div>
@@ -384,49 +365,33 @@ function Inventario(props) {
                     <Button variant="secondary" onClick={handleClose3}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={() => { UpdateProductos() }}>
+                    <Button variant="primary" onClick={() => { UpdateInventario() }}>
                         Registrar Productos
                     </Button>
                 </Modal.Footer>
             </Modal>
             <div id="NavTemporal" className="NavTemporal">
+
                 <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
                 <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
                 <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Material</button>
                 <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
                 <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-                <button onClick={() => Navegar('proveedores')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
+                <button onClick={() => Navegar('proveedores')} id="prooveedores" className="buttonOpcion2">Proveedor</button>
             </div>
-            <div className="InventarioTop">
-                <div className="tituloInve">
-                    <h3>Inventario</h3>
-                </div>
+            <div className="tituloProdi">
+                <h1>Proveedores</h1>
 
-                <div className="serch">
-                    <div className="group">
-                        <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
-                        <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
-                    </div>
-                </div>
             </div>
-
-
             <div className="contenidoTotal">
-                <div className="TablaContInven">
+                <div className="TablaCont">
                     <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>NumeroParte</th>
-                                <th>Volumen</th>
-                                <th>Existencia</th>
-                                <th>Precio</th>
-                                <th>P3</th>
-                                <th>Valor de Inv</th>
-                                <th>Fecha ent</th>
-                                <th>Fecha sal</th>
-                                <th>Proveedor</th>
-                                <th>Agregar</th>
+                                <th>Encargado</th>
+                                <th>Contacto</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -434,29 +399,34 @@ function Inventario(props) {
                                 filteredData.map((number, indice) =>
                                     <tr className="centrarfila">
                                         <td key={`1.${indice}`} >{number['data']['Nombre']}</td>
-                                        <td key={`2.${indice}`} >{number['data']['Dimension']}</td>
-                                        <td key={`3.${indice}`} >{number['data']['Volumen']}</td>
-                                        <td key={`4.${indice}`} >{number['data']['Existencia']}</td>
-                                        <td key={`5.${indice}`} >{number['data']['Precio']}</td>
-                                        <td key={`6.${indice}`} >{number['data']['EspacioEnAlmacen']}</td>
-                                        <td key={`7.${indice}`} >{number['data']['ValorInventario']}</td>
-                                        <td key={`8.${indice}`} >{number['data']['FechaEntrada']}</td>
-                                        <td key={`9.${indice}`} >{number['data']['FechaSalida']}</td>
-                                        <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
+                                        <td key={`3.${indice}`} >{number['data']['Encargado']}</td>
+                                        <td key={`4.${indice}`} >{number['data']['Contacto']}</td>
                                         <div className="accionAtomar">
-                                            <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
+                                            <button id="cancelarButton" onClick={() => { eliminarMejorado(number['data'], true, number['id']) }} >X</button>
                                             <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id']) }}><span > edit </span></button>
                                         </div>
                                     </tr>
                                 )
                             }
-                        </tbody>Existencia
+                        </tbody>
                     </Table>
                 </div>
-
+                <div className="OpcionesDeProductos">
+                    <p className="tituloProductoAmin">Administración de los Proveedores</p>
+                    <div className="group">
+                        <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                        <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
+                    </div>
+                    <br />
+                    <br />
+                    <div className="ButtonesAgregarProducto">
+                        <button id="NuevoProducto" onClick={handleShow3} >Agregar Proveedores</button>
+                        <button id="DesdeSheet">Agregar desde Sheet</button>
+                    </div>
+                </div>
             </div>
 
         </>
     );
 }
-export default Inventario;
+export default Proveedores;

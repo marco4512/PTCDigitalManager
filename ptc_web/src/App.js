@@ -10,6 +10,7 @@ import Productos from './components/Productos.jsx';
 import Nav from './components/Nav.jsx';
 import Reportes from './components/Resportes.jsx';
 import PanelPrincipal from './components/PanelPrincipal.jsx';
+import Proveedores from './components/Proveedores.jsx';
 function App() {
   const [usuario, setUsuario] = useState(null);
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path='/productos' element={<Productos setUsuario={setUsuario} />} />
         <Route path='/reportes' element={<Reportes setUsuario={setUsuario} />} />
         <Route path='/principal' element={<PanelPrincipal setUsuario={setUsuario} />} />
+        <Route path='/proveedores' element={<Proveedores setUsuario={setUsuario} />} />
       </Routes>
     </>
   );
