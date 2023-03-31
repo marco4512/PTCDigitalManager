@@ -1,15 +1,16 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { query, where, getDocs, doc, getFirestore, collection, setDoc, } from "firebase/firestore";
+import { query, where, getDocs, doc, getFirestore, collection, setDoc, updateDoc, } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 function Inventario(props) {
-    const [dimension, setDimension] = useState();
-    const [material, setMaterial] = useState();
-    const [nombre, setNombre] = useState();
-    const [volumen, setVolumen] = useState();
+    const [Existencia, setExistencia] = useState();
+    const [Precio, setPrecio] = useState();
+    const [Fecha_ent, setFecha_ent] = useState();
+    const [Proveedor, setProveedor] = useState();
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -42,17 +43,17 @@ function Inventario(props) {
     function onChangeEditar(event) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
-            case 'dimension':
-                setDimension(event.target.value);
+            case 'Existencia':
+                setExistencia(event.target.value);
                 break
-            case 'material':
-                setMaterial(event.target.value);
+            case 'Precio':
+                setPrecio(event.target.value);
                 break
-            case 'nombre':
-                setNombre(event.target.value);
+            case 'FechaEntrada':
+                setFecha_ent(event.target.value);
                 break
-            case 'volumen':
-                setVolumen(event.target.value);
+            case 'Proveedor':
+                setProveedor(event.target.value);
                 break
             default:
                 break;
@@ -141,10 +142,19 @@ function Inventario(props) {
 
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
-
+        let alldata = []
         querySnapshot.forEach((doc) => {
-            setProductos(doc.data())
+            if (doc.data()['Estatus']) {
+                let data = {
+                    'id': doc.id,
+                    'data': doc.data()
+                }
+                alldata.push(data)
+            }
+
         });
+        setProductos(alldata)
+        console.log(alldata)
 
     }
 
@@ -178,28 +188,27 @@ function Inventario(props) {
         let aux = filteredData;
         if (bandera) {
             setIndexTem(indice)
+            console.log(indice)
             setDataOf(data)
-            setDimension(data['Dimension'])
-            setMaterial(data['Material'])
-            setNombre(data['Nombre'])
-            setVolumen(data['Volumen'])
+            setExistencia(data['Existencia'])
+            setPrecio(data['Precio'])
+            setFecha_ent(data['FechaEntrada'])
+            setProveedor(data['Proveedor'])
             handleShow2()
 
         } else {
-            if (data['Dimension'] == dimension && data['Material'] == material && data['Nombre'] == nombre && data['Volumen'] == volumen) {
+            if (data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
                 //console.log('No se edito nada')
                 handleClose2()
             } else {
                 var productoEditado = {
-                    Nombre: nombre,
-                    Volumen: volumen,
-                    Dimension: dimension,
-                    Material: material
+                    Existencia: Existencia,
+                    Precio: Precio,
+                    FechaEntrada: Fecha_ent,
+                    Proveedor: Proveedor
                 }
-                aux[indexTem] = productoEditado
-                let aEnviar = { 'Productos': aux }
-                //console.log(aEnviar)
-                setDoc(docRef, aEnviar).then(docRef => {
+                const docRef = doc(db, "Inventario", String(indexTem));
+                updateDoc(docRef, productoEditado).then(docRef => {
                     //console.log("Entire Document has been updated successfully");
                     ExtraerProductos().then(function (x) {
                         handleClose2()
@@ -208,242 +217,216 @@ function Inventario(props) {
                 }).catch(error => {
                     console.log(error);
                 })
-
             }
+        
 
-        }
-
-    }
-    function eliminarFila(index, data) {
-        handleClose3();
-        data.splice(index, 1)
-        setProductosAgregar(data)
-        const timer = setTimeout(() => {
-            handleShow3();
-        }, .1);
     }
 
-    function onChangeDimension(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        //console.log(productosAgregar)
-        productosAgregar[indice]['Dimension'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    function onChangeMaterial(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Material'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    function onChangeNombre(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Nombre'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    function onChangeVolumen(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Volumen'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    const filteredData = productos.filter((row) =>
-        row.Nombre.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
-        row.Dimension.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
-    );
-    return (
-        <>
+}
+function eliminarFila(index, data) {
+    handleClose3();
+    data.splice(index, 1)
+    setProductosAgregar(data)
+    const timer = setTimeout(() => {
+        handleShow3();
+    }, .1);
+}
 
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header className="TituloEliminar" closeButton>
-                    <Modal.Title>Eliminar Producto</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >¿Estas Seguro que quieres eliminar este Producto?
-                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+function onChangeDimension(event) {
+    let valor = event.target.value;
+    let indice = event.target.name;
+    //console.log('Este es el indice', indice)
+    //console.log(productosAgregar)
+    productosAgregar[indice]['Dimension'] = valor;
+    setProductosAgregar([...productosAgregar])
+}
+function onChangeMaterial(event) {
+    let valor = event.target.value;
+    let indice = event.target.name;
+    //console.log('Este es el indice', indice)
+    productosAgregar[indice]['Material'] = valor;
+    setProductosAgregar([...productosAgregar])
+}
+function onChangeNombre(event) {
+    let valor = event.target.value;
+    let indice = event.target.name;
+    //console.log('Este es el indice', indice)
+    productosAgregar[indice]['Nombre'] = valor;
+    setProductosAgregar([...productosAgregar])
+}
+function onChangeVolumen(event) {
+    let valor = event.target.value;
+    let indice = event.target.name;
+    //console.log('Este es el indice', indice)
+    productosAgregar[indice]['Volumen'] = valor;
+    setProductosAgregar([...productosAgregar])
+}
+const filteredData = productos.filter((row) =>
+    row.data.Nombre.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
+    row.data.Dimension.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
+
+);
+const Proveedores =
+    <select id="frutas" name="frutas">
+        <option key={'asdf'} value={'asdf'}>uno uno</option>
+    </select>
+
+return (
+    <>
+
+
+        <Modal size="lg" centered show={show2} onHide={handleClose2}>
+            <Modal.Header className="TituloEditar" closeButton>
+                <Modal.Title>Editar Inventario</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="bodymodla" >Actualiza tu inventario
+                <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                    <thead>
+                        <tr>
+                            <th>Existencia</th>
+                            <th>Precio</th>
+                            <th>Fecha ent</th>
+                            <th>Proveedor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            <tr className="centrarfila">
+                                <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Existencia' value={Existencia} /></td>
+                                <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Precio' value={Precio} /></td>
+                                <td key={2} ><input className="inputEditar" required type="date" onChange={onChangeEditar} name='FechaEntrada' /></td>
+                                <td key={3}>
+                                    {
+                                        Proveedores
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </Table>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose2}>
+                    Cancelar
+                </Button>
+                <Button variant="primary" onClick={() => { editarProductoMejorado(dataOf, false) }}>
+                    GuardarCambios
+                </Button>
+            </Modal.Footer>
+        </Modal>
+        <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
+            <Modal.Header className="TituloProductosNuevos" closeButton>
+                <Modal.Title>Agregar Productos</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="bodymodla" >
+                <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
+                <div className="tablaAgregarProductos">
+                    <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
                         <thead>
                             <tr>
                                 <th>Dimensión</th>
                                 <th>Material</th>
                                 <th>Nombre</th>
                                 <th>Volumen</th>
+                                <th>Action</th>
+
                             </tr>
                         </thead>
-                        <tbody>
-                            {
-                                <tr className="centrarfila">
-                                    <td key={1} >{dataOf['Dimension']}</td>
-                                    <td key={2} >{dataOf['Material']}</td>
-                                    <td key={2} >{dataOf['Nombre']}</td>
-                                    <td key={3} >{dataOf['Volumen']}</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </Table>
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { eliminarMejorado(dataOf, false) }}>
-                        Eliminar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal size="lg" centered show={show2} onHide={handleClose2}>
-                <Modal.Header className="TituloEditar" closeButton>
-                    <Modal.Title>Editar Producto</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >Ingresa los nuevos campos de tu producto
-                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                        <thead>
-                            <tr>
-                                <th>Dimensión</th>
-                                <th>Material</th>
-                                <th>Nombre</th>
-                                <th>Volumen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-
-                                <tr className="centrarfila">
-                                    <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='dimension' value={dimension} /></td>
-                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='material' value={material} /></td>
-                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='nombre' value={nombre} /></td>
-                                    <td key={3} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='volumen' value={volumen} /></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </Table>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose2}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { editarProductoMejorado(dataOf, false) }}>
-                        GuardarCambios
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-            <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
-                <Modal.Header className="TituloProductosNuevos" closeButton>
-                    <Modal.Title>Agregar Productos</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >
-                    <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
-                    <div className="tablaAgregarProductos">
-                        <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
-                            <thead>
-                                <tr>
-                                    <th>Dimensión</th>
-                                    <th>Material</th>
-                                    <th>Nombre</th>
-                                    <th>Volumen</th>
-                                    <th>Action</th>
-
-                                </tr>
-                            </thead>
-                            {
-                                productosAgregar.map((keys, index) =>
-                                    <tbody>
-                                        <tr className="centrarfila">
-                                            <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
-                                            <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
-                                            <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
-                                            <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
-                                            <div className="accionAtomar">
-                                                <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
-                                            </div>
-                                        </tr>
-                                    </tbody>
-                                )
-                            }
-                        </Table>
-                        <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose3}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { UpdateProductos() }}>
-                        Registrar Productos
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-            <div id="NavTemporal" className="NavTemporal">
-                <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Productos</button>
-                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-            </div>
-            <div className="InventarioTop">
-                <div className="tituloInve">
-                    <h3>Inventario</h3>
-                </div>
-
-                <div className="serch">
-                    <div className="group">
-                        <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
-                        <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
-                    </div>
-                </div>
-            </div>
-
-
-            <div className="contenidoTotal">
-                <div className="TablaContInven">
-                    <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>NumeroParte</th>
-                                <th>Volumen</th>
-                                <th>Existencia</th>
-                                <th>Precio</th>
-                                <th>P3</th>
-                                <th>Valor de Inv</th>
-                                <th>Fecha ent</th>
-                                <th>Fecha sal</th>
-                                <th>Proveedor</th>
-                                <th>Agregar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                filteredData.map((number, indice) =>
+                        {
+                            productosAgregar.map((keys, index) =>
+                                <tbody>
                                     <tr className="centrarfila">
-                                        <td key={`1.${indice}`} >{number['Nombre']}</td>
-                                        <td key={`2.${indice}`} >{number['Dimension']}</td>
-                                        <td key={`3.${indice}`} >{number['Volumen']}</td>
-                                        <td key={`4.${indice}`} >{number['Existencia']}</td>
-                                        <td key={`5.${indice}`} >{number['Precio']}</td>
-                                        <td key={`6.${indice}`} >{number['EspacioEnAlmacen']}</td>
-                                        <td key={`7.${indice}`} >{number['ValorInventario']}</td>
-                                        <td key={`8.${indice}`} >{number['FechaEntrada']}</td>
-                                        <td key={`9.${indice}`} >{number['FechaSalida']}</td>
-                                        <td key={`10.${indice}`} >{number['Proveedor']}</td>
+                                        <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
+                                        <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
+                                        <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
+                                        <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
                                         <div className="accionAtomar">
-                                            <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
+                                            <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
                                         </div>
                                     </tr>
-                                )
-                            }
-                        </tbody>
+                                </tbody>
+                            )
+                        }
                     </Table>
+                    <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
                 </div>
-
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose3}>
+                    Cancelar
+                </Button>
+                <Button variant="primary" onClick={() => { UpdateProductos() }}>
+                    Registrar Productos
+                </Button>
+            </Modal.Footer>
+        </Modal>
+        <div id="NavTemporal" className="NavTemporal">
+            <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
+            <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
+            <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Productos</button>
+            <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
+            <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
+        </div>
+        <div className="InventarioTop">
+            <div className="tituloInve">
+                <h3>Inventario</h3>
             </div>
 
-        </>
-    );
+            <div className="serch">
+                <div className="group">
+                    <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                    <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
+                </div>
+            </div>
+        </div>
+
+
+        <div className="contenidoTotal">
+            <div className="TablaContInven">
+                <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>NumeroParte</th>
+                            <th>Volumen</th>
+                            <th>Existencia</th>
+                            <th>Precio</th>
+                            <th>P3</th>
+                            <th>Valor de Inv</th>
+                            <th>Fecha ent</th>
+                            <th>Fecha sal</th>
+                            <th>Proveedor</th>
+                            <th>Agregar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            filteredData.map((number, indice) =>
+                                <tr className="centrarfila">
+                                    <td key={`1.${indice}`} >{number['data']['Nombre']}</td>
+                                    <td key={`2.${indice}`} >{number['data']['Dimension']}</td>
+                                    <td key={`3.${indice}`} >{number['data']['Volumen']}</td>
+                                    <td key={`4.${indice}`} >{number['data']['Existencia']}</td>
+                                    <td key={`5.${indice}`} >{number['data']['Precio']}</td>
+                                    <td key={`6.${indice}`} >{number['data']['EspacioEnAlmacen']}</td>
+                                    <td key={`7.${indice}`} >{number['data']['ValorInventario']}</td>
+                                    <td key={`8.${indice}`} >{number['data']['FechaEntrada']}</td>
+                                    <td key={`9.${indice}`} >{number['data']['FechaSalida']}</td>
+                                    <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
+                                    <div className="accionAtomar">
+                                        <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
+                                        <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id']) }}><span > edit </span></button>
+                                    </div>
+                                </tr>
+                            )
+                        }
+                    </tbody>
+                </Table>
+            </div>
+
+        </div>
+
+    </>
+);
 }
 export default Inventario;

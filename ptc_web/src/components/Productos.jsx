@@ -150,14 +150,14 @@ function Productos(props) {
         Productos.map(function (fila, index) {
             const documento = { // Crear el objeto con los datos del producto
                 Dimension: fila['Dimension'],
-                EspacioEnAlmacen: "0",
-                Existencia: "0",
+                EspacioEnAlmacen: 0,
+                Existencia: 0,
                 FechaEntrada: "",
                 FechaSalida: "",
                 Nombre: fila['Nombre'],
-                Precio: "0",
+                Precio:0,
                 Proveedor: "",
-                ValorInventario: "0",
+                ValorInventario: 0,
                 Volumen: fila['Volumen'],
                 Estatus: true
             };
@@ -179,10 +179,12 @@ function Productos(props) {
 
     async function eliminarMejorado(data, bandera, indice) {
         let aux = filteredData;
+    
         if (bandera) {
             setIndexTem(indice)
             setDataOf(data)
             handleShow()
+            console.log(indice)
         } else {
             delete aux[indexTem];
             //console.log('data :', aux)
@@ -198,6 +200,7 @@ function Productos(props) {
                     handleClose()
                     estatusToFalse(indexTem)
                     setIndexTem()
+
                 })
             }).catch(error => {
                 console.log(error);
