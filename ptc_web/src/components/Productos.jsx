@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { query, where, getDocs, doc, getFirestore, collection, setDoc } from "firebase/firestore";
+import { query, where, getDocs, doc, getFirestore, collection, setDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
@@ -196,6 +196,7 @@ function Productos(props) {
                 //console.log("Entire Document has been updated successfully");
                 ExtraerProductos().then(function (x) {
                     handleClose()
+                    estatusToFalse(indexTem)
                     setIndexTem()
                 })
             }).catch(error => {
@@ -203,6 +204,21 @@ function Productos(props) {
             })
         }
     }
+
+    async function estatusToFalse(index) {
+        const docRef = doc(db, "Inventario", String(index));
+        const data = {
+            Estatus: false
+        };
+        updateDoc(docRef, data)
+            .then(docRef => {
+                console.log("Entire Document has been updated successfully");
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
     async function editarProductoMejorado(data, bandera, indice) {
         let aux = filteredData;
         if (bandera) {
