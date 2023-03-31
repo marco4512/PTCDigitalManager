@@ -199,6 +199,7 @@ function Productos(props) {
                 ExtraerProductos().then(function (x) {
                     handleClose()
                     estatusToFalse(indexTem)
+                    
                     setIndexTem()
 
                 })
