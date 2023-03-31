@@ -21,5 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.history
-ptc_web\src\Firebase\firebase.js
+/.history/
+node_modules
+ptc_web/src/Firebase/firebase.js
