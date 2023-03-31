@@ -6,8 +6,8 @@ import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 function Inventario(props) {
-    const [Existencia, setExistencia] = useState();
-    const [Precio, setPrecio] = useState();
+    const [Existencia, setExistencia] = useState("");
+    const [Precio, setPrecio] = useState("");
     const [Fecha_ent, setFecha_ent] = useState();
     const [Proveedor, setProveedor] = useState();
 
@@ -44,10 +44,15 @@ function Inventario(props) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
             case 'Existencia':
-                setExistencia(event.target.value);
+                if (/^[0-9]*$/.test(event.target.value)) {
+                    setExistencia(event.target.value);
+                }
                 break
             case 'Precio':
-                setPrecio(event.target.value);
+                if (/^[0-9]*\.?[0-9]*$/.test(event.target.value)) {
+                    setPrecio(event.target.value);
+                    console.log("El valor es válido");
+                }
                 break
             case 'FechaEntrada':
                 setFecha_ent(event.target.value);
@@ -197,16 +202,18 @@ function Inventario(props) {
             handleShow2()
 
         } else {
+
             if (data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
                 //console.log('No se edito nada')
                 handleClose2()
             } else {
                 var productoEditado = {
-                    Existencia: Existencia,
-                    Precio: Precio,
+                    Existencia: Existencia!=''?Existencia:'0' ,
+                    Precio: Precio!=''?Precio:'0.0',
                     FechaEntrada: Fecha_ent,
                     Proveedor: Proveedor
                 }
+                console.log(Existencia.lenght)
                 const docRef = doc(db, "Inventario", String(indexTem));
                 updateDoc(docRef, productoEditado).then(docRef => {
                     //console.log("Entire Document has been updated successfully");
@@ -218,215 +225,215 @@ function Inventario(props) {
                     console.log(error);
                 })
             }
-        
+
+
+        }
 
     }
+    function eliminarFila(index, data) {
+        handleClose3();
+        data.splice(index, 1)
+        setProductosAgregar(data)
+        const timer = setTimeout(() => {
+            handleShow3();
+        }, .1);
+    }
 
-}
-function eliminarFila(index, data) {
-    handleClose3();
-    data.splice(index, 1)
-    setProductosAgregar(data)
-    const timer = setTimeout(() => {
-        handleShow3();
-    }, .1);
-}
+    function onChangeDimension(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        //console.log('Este es el indice', indice)
+        //console.log(productosAgregar)
+        productosAgregar[indice]['Dimension'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeMaterial(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        //console.log('Este es el indice', indice)
+        productosAgregar[indice]['Material'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeNombre(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        //console.log('Este es el indice', indice)
+        productosAgregar[indice]['Nombre'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    function onChangeVolumen(event) {
+        let valor = event.target.value;
+        let indice = event.target.name;
+        //console.log('Este es el indice', indice)
+        productosAgregar[indice]['Volumen'] = valor;
+        setProductosAgregar([...productosAgregar])
+    }
+    const filteredData = productos.filter((row) =>
+        row.data.Nombre.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
+        row.data.Dimension.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
 
-function onChangeDimension(event) {
-    let valor = event.target.value;
-    let indice = event.target.name;
-    //console.log('Este es el indice', indice)
-    //console.log(productosAgregar)
-    productosAgregar[indice]['Dimension'] = valor;
-    setProductosAgregar([...productosAgregar])
-}
-function onChangeMaterial(event) {
-    let valor = event.target.value;
-    let indice = event.target.name;
-    //console.log('Este es el indice', indice)
-    productosAgregar[indice]['Material'] = valor;
-    setProductosAgregar([...productosAgregar])
-}
-function onChangeNombre(event) {
-    let valor = event.target.value;
-    let indice = event.target.name;
-    //console.log('Este es el indice', indice)
-    productosAgregar[indice]['Nombre'] = valor;
-    setProductosAgregar([...productosAgregar])
-}
-function onChangeVolumen(event) {
-    let valor = event.target.value;
-    let indice = event.target.name;
-    //console.log('Este es el indice', indice)
-    productosAgregar[indice]['Volumen'] = valor;
-    setProductosAgregar([...productosAgregar])
-}
-const filteredData = productos.filter((row) =>
-    row.data.Nombre.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')) ||
-    row.data.Dimension.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', ''))
+    );
+    const Proveedores =
+        <select id="frutas" name="frutas">
+            <option key={'asdf'} value={'asdf'}>uno uno</option>
+        </select>
 
-);
-const Proveedores =
-    <select id="frutas" name="frutas">
-        <option key={'asdf'} value={'asdf'}>uno uno</option>
-    </select>
-
-return (
-    <>
+    return (
+        <>
 
 
-        <Modal size="lg" centered show={show2} onHide={handleClose2}>
-            <Modal.Header className="TituloEditar" closeButton>
-                <Modal.Title>Editar Inventario</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="bodymodla" >Actualiza tu inventario
-                <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                    <thead>
-                        <tr>
-                            <th>Existencia</th>
-                            <th>Precio</th>
-                            <th>Fecha ent</th>
-                            <th>Proveedor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            <tr className="centrarfila">
-                                <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Existencia' value={Existencia} /></td>
-                                <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Precio' value={Precio} /></td>
-                                <td key={2} ><input className="inputEditar" required type="date" onChange={onChangeEditar} name='FechaEntrada' /></td>
-                                <td key={3}>
-                                    {
-                                        Proveedores
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </Table>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose2}>
-                    Cancelar
-                </Button>
-                <Button variant="primary" onClick={() => { editarProductoMejorado(dataOf, false) }}>
-                    GuardarCambios
-                </Button>
-            </Modal.Footer>
-        </Modal>
-        <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
-            <Modal.Header className="TituloProductosNuevos" closeButton>
-                <Modal.Title>Agregar Productos</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className="bodymodla" >
-                <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
-                <div className="tablaAgregarProductos">
-                    <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
+            <Modal size="lg" centered show={show2} onHide={handleClose2}>
+                <Modal.Header className="TituloEditar" closeButton>
+                    <Modal.Title>Editar Inventario</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >Actualiza tu inventario
+                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Dimensión</th>
-                                <th>Material</th>
-                                <th>Nombre</th>
-                                <th>Volumen</th>
-                                <th>Action</th>
-
+                                <th>Existencia</th>
+                                <th>Precio</th>
+                                <th>Fecha ent</th>
+                                <th>Proveedor</th>
                             </tr>
                         </thead>
-                        {
-                            productosAgregar.map((keys, index) =>
-                                <tbody>
+                        <tbody>
+                            {
+                                <tr className="centrarfila">
+                                    <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Existencia' value={Existencia} /></td>
+                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Precio' value={Precio} /></td>
+                                    <td key={2} ><input className="inputEditar" required type="date" onChange={onChangeEditar} name='FechaEntrada' /></td>
+                                    <td key={3}>
+                                        {
+                                            Proveedores
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </Table>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose2}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { editarProductoMejorado(dataOf, false) }}>
+                        GuardarCambios
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
+                <Modal.Header className="TituloProductosNuevos" closeButton>
+                    <Modal.Title>Agregar Productos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" >
+                    <p className="ingresanuevosprod">Ingresa un nuevo producto</p>
+                    <div className="tablaAgregarProductos">
+                        <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
+                            <thead>
+                                <tr>
+                                    <th>Dimensión</th>
+                                    <th>Material</th>
+                                    <th>Nombre</th>
+                                    <th>Volumen</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            {
+                                productosAgregar.map((keys, index) =>
+                                    <tbody>
+                                        <tr className="centrarfila">
+                                            <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
+                                            <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
+                                            <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
+                                            <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
+                                            <div className="accionAtomar">
+                                                <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
+                                            </div>
+                                        </tr>
+                                    </tbody>
+                                )
+                            }
+                        </Table>
+                        <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose3}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { UpdateProductos() }}>
+                        Registrar Productos
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <div id="NavTemporal" className="NavTemporal">
+                <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
+                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
+                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Productos</button>
+                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
+                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
+            </div>
+            <div className="InventarioTop">
+                <div className="tituloInve">
+                    <h3>Inventario</h3>
+                </div>
+
+                <div className="serch">
+                    <div className="group">
+                        <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                        <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
+                    </div>
+                </div>
+            </div>
+
+
+            <div className="contenidoTotal">
+                <div className="TablaContInven">
+                    <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>NumeroParte</th>
+                                <th>Volumen</th>
+                                <th>Existencia</th>
+                                <th>Precio</th>
+                                <th>P3</th>
+                                <th>Valor de Inv</th>
+                                <th>Fecha ent</th>
+                                <th>Fecha sal</th>
+                                <th>Proveedor</th>
+                                <th>Agregar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                filteredData.map((number, indice) =>
                                     <tr className="centrarfila">
-                                        <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
-                                        <td key={2} ><input className="inputEditar" name={index} onChange={onChangeMaterial} required type="text" value={keys['Material']} /></td>
-                                        <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
-                                        <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
+                                        <td key={`1.${indice}`} >{number['data']['Nombre']}</td>
+                                        <td key={`2.${indice}`} >{number['data']['Dimension']}</td>
+                                        <td key={`3.${indice}`} >{number['data']['Volumen']}</td>
+                                        <td key={`4.${indice}`} >{number['data']['Existencia']}</td>
+                                        <td key={`5.${indice}`} >{number['data']['Precio']}</td>
+                                        <td key={`6.${indice}`} >{number['data']['EspacioEnAlmacen']}</td>
+                                        <td key={`7.${indice}`} >{number['data']['ValorInventario']}</td>
+                                        <td key={`8.${indice}`} >{number['data']['FechaEntrada']}</td>
+                                        <td key={`9.${indice}`} >{number['data']['FechaSalida']}</td>
+                                        <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
                                         <div className="accionAtomar">
-                                            <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
+                                            <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
+                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id']) }}><span > edit </span></button>
                                         </div>
                                     </tr>
-                                </tbody>
-                            )
-                        }
+                                )
+                            }
+                        </tbody>
                     </Table>
-                    <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
                 </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose3}>
-                    Cancelar
-                </Button>
-                <Button variant="primary" onClick={() => { UpdateProductos() }}>
-                    Registrar Productos
-                </Button>
-            </Modal.Footer>
-        </Modal>
-        <div id="NavTemporal" className="NavTemporal">
-            <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-            <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-            <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Productos</button>
-            <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-            <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-        </div>
-        <div className="InventarioTop">
-            <div className="tituloInve">
-                <h3>Inventario</h3>
+
             </div>
 
-            <div className="serch">
-                <div className="group">
-                    <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
-                    <input placeholder="Search" onChange={handleSearchChange} type="search" className="input" />
-                </div>
-            </div>
-        </div>
-
-
-        <div className="contenidoTotal">
-            <div className="TablaContInven">
-                <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>NumeroParte</th>
-                            <th>Volumen</th>
-                            <th>Existencia</th>
-                            <th>Precio</th>
-                            <th>P3</th>
-                            <th>Valor de Inv</th>
-                            <th>Fecha ent</th>
-                            <th>Fecha sal</th>
-                            <th>Proveedor</th>
-                            <th>Agregar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            filteredData.map((number, indice) =>
-                                <tr className="centrarfila">
-                                    <td key={`1.${indice}`} >{number['data']['Nombre']}</td>
-                                    <td key={`2.${indice}`} >{number['data']['Dimension']}</td>
-                                    <td key={`3.${indice}`} >{number['data']['Volumen']}</td>
-                                    <td key={`4.${indice}`} >{number['data']['Existencia']}</td>
-                                    <td key={`5.${indice}`} >{number['data']['Precio']}</td>
-                                    <td key={`6.${indice}`} >{number['data']['EspacioEnAlmacen']}</td>
-                                    <td key={`7.${indice}`} >{number['data']['ValorInventario']}</td>
-                                    <td key={`8.${indice}`} >{number['data']['FechaEntrada']}</td>
-                                    <td key={`9.${indice}`} >{number['data']['FechaSalida']}</td>
-                                    <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
-                                    <div className="accionAtomar">
-                                        <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
-                                        <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id']) }}><span > edit </span></button>
-                                    </div>
-                                </tr>
-                            )
-                        }
-                    </tbody>
-                </Table>
-            </div>
-
-        </div>
-
-    </>
-);
+        </>
+    );
 }
 export default Inventario;
