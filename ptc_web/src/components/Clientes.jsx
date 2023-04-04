@@ -174,27 +174,6 @@ function Clientes(props) {
 
 
     }
-
-
-
-    async function subColeccion(tarima) {
-        var axobj = {};
-        const subColRef = collection(db, "Tarimas", tarima, 'Construccion');
-        const querySnapshot = await getDocs(subColRef)
-        querySnapshot.forEach((doc) => {
-            axobj[doc.id] = doc.data();
-        })
-        let salida = {};
-        salida[tarima] = axobj
-        //console.log('_arregloTarimas_', tempTarima, ' nombreTarima', tarima)
-        if (!tempTarima.includes(tarima)) {
-            tempTarima.push(tarima)
-            //console.log('Entro a tarimas ', salida)
-            //console.log('nuevas tarimas', tempTarima)
-            setDataFilter(prev => [...prev, salida])
-        }
-    }
-
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
         let alldata = []
@@ -211,27 +190,31 @@ function Clientes(props) {
         });
         setProductos(alldata)
     }
-    const [nT, setNT] = useState('')
+    const[TarimaAEliminar,setTarimaAEliminar]=useState('')
+    const[indiceTarimaTemp,setIndiceTarimaTemp]= useState('')
+    const[temporalAllCliente,setTemporalAllCliente]= useState('')
+
     async function eliminarTarima(data, bandera, indice) {
         if (bandera) {
-            let sal = {}
-            setNT(Object.keys(data)[0])
-            sal[Object.keys(data)[0]] = data[Object.keys(data)[0]]
-            setAntesEliminar([])
-            setAntesEliminar([sal])
-            handleShow4()
+            console.log(data,indice) 
+            setTemporalAllCliente(data)
+            setTarimaAEliminar(allTarimas[0][data][indice])
+            setIndiceTarimaTemp(indice)
+            handleShow()
         } else {
-            let newData = [];
-            dataFilter.map(function (fila) {
-                if (nT != Object.keys(fila)[0]) {
-                    newData.push(fila)
-                }
+            const docRef = doc(db, "Clientes",temporalAllCliente)
+            let newData={}
+            newData[TarimaAEliminar]=false
+            updateDoc(docRef, newData).then(docRef => {
+                ExtraerTarimas().then(x=>handleClose())
+               
+            }).catch(error => {
+                console.log(error);
             })
-            const docRef = doc(db, "Tarimas", nT);
-            deleteDoc(docRef).then(function (fila) {
-                setDataFilter(newData)
-                handleClose4()
-            })
+      
+            
+
+           
         }
     }
     const [nombreTarimaTemp, setNombreTarimaTemp] = useState('')
@@ -432,126 +415,31 @@ function Clientes(props) {
         productosAgregar[indice]['Volumen'] = valor;
         setProductosAgregar([...productosAgregar])
     }
+
     function onChangeSelect(event) {
         let valor = event.target.value;
         setMaterial(valor)
     }
     const filteredData = []
-    //const filteredData2 = dataFilter.filter((key) => key.toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')));
     const filteredData2 = allTarimas.filter((key) => Object.keys(key).includes(searchTerm.toLocaleUpperCase().trim().replaceAll(' ', '')) || searchTerm.length == 0);
-
-
 
     return (
         <>
-            <Modal show={show5} onHide={handleClose5}>
-                <Modal.Header className="TituloEditar" closeButton>
-                    <Modal.Title>Agregar nuevo Material</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" > Selecciona El material y agrega La cantidad
-                    {
-                        <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                            <thead>
-                                <tr>
-                                    <th>Material</th>
-                                    <th>Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    <tr className="centrarfila">
-                                        <select id="select" onChange={onChangeSelect} name="Material">
-                                            <option key={'0.0'} value={'noVale'}>Selecciona uno</option>
-                                            {productos.map((fila, indice) =>
-                                                <option key={fila['data']['id']} value={fila['id']}>{fila['data']['Dimension'] + ' ---- ' + fila['data']['Nombre']}</option>
-                                            )}
-                                        </select>
-                                        <td key={1} ><input className="inputEditar" required type={"number"} min={1} max={100000} onChange={onChangeEditar} pattern="[0-9]*" name='cantidad' /></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </Table>
-                    }
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose5}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { agregarProducto(false) }}>
-                        Agregar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={show4} onHide={handleClose4}>
+            <Modal show={show} onHide={handleClose}>
                 <Modal.Header className="TituloEliminar" closeButton>
                     <Modal.Title>Eliminar Tarima</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="bodymodla" >Estas seguro que deeseas eliminar esta tarima ?
-                    {
-                        Object.keys(antesEliminar).map((data, indice) =>
-                            <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                                <thead>
-                                    <tr className="nombreTarima">
-                                        <th className="centarTitule" colSpan={3} >
-                                            Nombre de la tarima <br />
-                                            {Object.keys(antesEliminar[data])}
-
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Dimensiones</th>
-                                        <th>Cantidad</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        Object.keys(antesEliminar[data][Object.keys(antesEliminar[data])]).map(fila =>
-                                            < tr className="centrarfila">
-                                                <td key={`1`} >{antesEliminar[data][Object.keys(antesEliminar[data])][fila]['Nombre']}</td>
-                                                <td key={`2`} >{antesEliminar[data][Object.keys(antesEliminar[data])][fila]['Dimension']}</td>
-                                                <td key={`3`} >{antesEliminar[data][Object.keys(antesEliminar[data])][fila]['Cantidad']}</td>
-                                            </tr>
-                                        )
-                                    }
-                                </tbody>
-
-                            </Table>
-                        )
-                    }
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose4}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { eliminarTarima(dataOf, false) }}>
-                        Eliminar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header className="TituloEliminar" closeButton>
-                    <Modal.Title>Eliminar Material</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >¿Estas Seguro que quieres eliminar este Material?
+                <Modal.Body className="bodymodla" >¿Estas Seguro que quieres eliminar esta Tarima?
                     <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
                         <thead>
                             <tr>
-                                <th>Dimension</th>
                                 <th>Nombre</th>
-                                <th>Cantidad</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 <tr className="centrarfila">
-                                    <td key={1} >{dataOf['Dimension']}</td>
-                                    <td key={2} >{dataOf['Nombre']}</td>
-                                    <td key={3} >{dataOf['Cantidad']}</td>
+                                    <td key={1} >{TarimaAEliminar}</td>
                                 </tr>
                             }
                         </tbody>
@@ -562,98 +450,8 @@ function Clientes(props) {
                     <Button variant="secondary" onClick={handleClose}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={() => { eliminarMejorado(dataOf, false) }}>
+                    <Button variant="primary" onClick={() => { eliminarTarima(TarimaAEliminar, false)} }>
                         Eliminar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal size="lg" centered show={show2} onHide={handleClose2}>
-                <Modal.Header className="TituloEditar" closeButton>
-                    <Modal.Title>Editar Material</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >Ingresa los nuevos campos de tu Material
-                    <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                        <thead>
-                            <tr>
-                                <th>Dimensión</th>
-                                <th>Nombre</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-
-                                <tr className="centrarfila">
-                                    <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='dimension' value={dimension} /></td>
-                                    <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='nombre' value={nombre} /></td>
-                                    <td key={3} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='cantidad' value={cantidad} /></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </Table>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose2}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { editarProductoMejorado(dataOf, false) }}>
-                        GuardarCambios
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-            <Modal size="xl" animation={false} centered show={show3} onHide={handleClose3}>
-                <Modal.Header className="TituloProductosNuevos" closeButton>
-                    <Modal.Title>Agregar Tarima</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="bodymodla" >
-                    <p className="ingresanuevosprod">Define una nueva Tarima</p>
-                    <div className="tablaAgregarProductos">
-                        <Table id="TBALADIRECTA" striped bordered hover className="table table-bordered border border-secondary">
-                            <thead>
-                                <tr className="nombreTarima">
-                                    <th>Nombre Tarima: </th>
-                                    <th className="centarTitule">
-                                        <input type="text" onChange={onChangeNombreTarima} className="inputEditar" />
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>Material</th>
-                                    <th>Cantidad</th>
-                                </tr>
-                            </thead>
-                            {
-                                productosAgregar.map((keys, index) =>
-                                    <tbody>
-                                        <tr className="centrarfila">
-                                            <td key={1} >
-                                                <select id="select" onChange={onChangeSelctTow} name={index} value={keys['Select']} >
-                                                    <option key={'0.0'} value={'noVale'}>{keys['Select']}</option>
-                                                    {productos.map((fila, indice) =>
-                                                        <option key={fila['data']['id']} value={fila['id']}>{fila['data']['Dimension'] + ' ---- ' + fila['data']['Nombre']}</option>
-                                                    )}
-                                                </select>
-
-                                            </td>
-                                            <td key={3} ><input className="inputEditar" name={index} onChange={onChangeCantidad} required type="text" value={keys['Cantidad']} /></td>
-
-                                            <div className="accionAtomar">
-                                                <button id="cancelarButton" onClick={() => eliminarFila(index, productosAgregar)} >X</button>
-                                            </div>
-                                        </tr>
-                                    </tbody>
-                                )
-                            }
-                        </Table>
-                        <button onClick={() => AñadirFila()} className="nuevafilaButton">Agregar una nueva fila</button>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose3}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={() => { UpdateInventario() }}>
-                        Registrar Productos
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -683,8 +481,9 @@ function Clientes(props) {
                                             {nombreCLiente}
                                         </th>
                                         <th colSpan={2}>
-                                            Eliminar/Agregar
+                                        
                                             <div className="accionAtomar">
+                                                <p>Eliminar o Agregar</p>
                                                 <button id="cancelarButton" >X</button>
                                                 <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
                                             </div>
@@ -698,12 +497,12 @@ function Clientes(props) {
                                 </thead>
                                 <tbody>
                                     {
-                                         data[nombreCLiente].map((fila) =>
+                                         data[nombreCLiente].map((fila,indice) =>
                                             < tr className="centrarfila">
                                                 <td key={`1`} colSpan={2} >{fila}</td>
                                                 <td key={`2`} >{nombreCLiente.substr(0, 2)+' '+fila}</td>
                                                 <div className="accionAtomar">
-                                                    <button id="cancelarButton"  >X</button>
+                                                    <button id="cancelarButton" onClick={()=>eliminarTarima(nombreCLiente, true,indice)}>X</button>
                                                     <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button>
                                                 </div>
                                             </tr>

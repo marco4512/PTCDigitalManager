@@ -318,7 +318,9 @@ margin: 10px;
   height: 100%;
   margin: 0 auto;
   text-align: center;
- 
+}
+.accionAtomar p{
+  align-items: center;
 }
 
 .accionAtomar button {
