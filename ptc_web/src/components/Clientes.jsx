@@ -10,7 +10,7 @@ function Clientes(props) {
     const [tempTarima, setTempTarima] = useState([]);
     const [dataFilter, setDataFilter] = useState([])
     const [dimension, setDimension] = useState();
-    const [material, setMaterial] = useState('vacio');
+    const [tarima, setTarima] = useState('vacio');
     const [nombre, setNombre] = useState();
     const [cantidad, setCantidad] = useState();
     const [show, setShow] = useState(false);
@@ -81,7 +81,8 @@ function Clientes(props) {
                 setEmail(usuarioFirebase.email);
                 ObtenerNav(usuarioFirebase.email)
                 ExtraerTarimas().then(x => x)
-                console.log('vacio->', allTarimas)
+                ExtraerIdTarimas().then(x => x);
+                // console.log('vacio->', allTarimas)
             }
             props.setUsuario(usuarioFirebase);
         });
@@ -147,7 +148,7 @@ function Clientes(props) {
         let formato = {}
         formato[nombreTarimados] = salida
         auxData[newIndex] = formato;
-        console.log(auxData)
+        // console.log(auxData)
 
     }
 
@@ -170,9 +171,26 @@ function Clientes(props) {
         })
         AllTarimas.map(fila => salidaFormateado[fila[1]].push(fila[0]))
         setAllTarimas([salidaFormateado])
-        console.log(allTarimas)
+        // console.log(allTarimas)
 
 
+    }
+    const [allIdTarimas, setAllIdTarimas] = useState([]);
+
+    async function ExtraerIdTarimas() {
+        const subColRef = collection(db, "Tarimas");
+
+        const querySnapshot = await getDocs(subColRef)
+        let AllIdTarimas = [];
+        let salidaFormateado = {};
+        querySnapshot.forEach((doc) => {
+            AllIdTarimas.push(doc.id)
+            // console.log(doc.id)
+        })
+        // AllIdTarimas.map(fila => salidaFormateado[fila[1]].push(fila[0]))
+        setAllIdTarimas(AllIdTarimas)
+
+        
     }
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
@@ -190,43 +208,43 @@ function Clientes(props) {
         });
         setProductos(alldata)
     }
-    const[TarimaAEliminar,setTarimaAEliminar]=useState('')
-    const[indiceTarimaTemp,setIndiceTarimaTemp]= useState('')
-    const[temporalAllCliente,setTemporalAllCliente]= useState('')
+    const [TarimaAEliminar, setTarimaAEliminar] = useState('')
+    const [indiceTarimaTemp, setIndiceTarimaTemp] = useState('')
+    const [temporalAllCliente, setTemporalAllCliente] = useState('')
 
     async function eliminarTarima(data, bandera, indice) {
         if (bandera) {
-            console.log(data,indice) 
+            // console.log(data, indice)
             setTemporalAllCliente(data)
             setTarimaAEliminar(allTarimas[0][data][indice])
             setIndiceTarimaTemp(indice)
             handleShow()
         } else {
-            const docRef = doc(db, "Clientes",temporalAllCliente)
-            let newData={}
-            newData[TarimaAEliminar]=false
+            const docRef = doc(db, "Clientes", temporalAllCliente)
+            let newData = {}
+            newData[TarimaAEliminar] = false
             updateDoc(docRef, newData).then(docRef => {
-                ExtraerTarimas().then(x=>handleClose())
-               
+                ExtraerTarimas().then(x => handleClose())
+
             }).catch(error => {
                 console.log(error);
             })
-      
-            
 
-           
+
+
+
         }
     }
     const [nombreTarimaTemp, setNombreTarimaTemp] = useState('')
     async function eliminarMejorado(data, bandera, indice) {
         if (bandera) {
             setIndexTem(indice)
-            console.log(indice, data)
+            // console.log(indice, data)
             setNombreTarimaTemp(Object.keys(data)[0])
             setDataOf(data[Object.keys(data)[0]][indice])
             handleShow()
         } else {
-            console.log("Tarimas", nombreTarimaTemp, 'Construccion', indexTem)
+            // console.log("Tarimas", nombreTarimaTemp, 'Construccion', indexTem)
             let indiceTarima;
             dataFilter.map(function (fila, indice) {
                 if (fila[nombreTarimaTemp] != undefined) {
@@ -246,36 +264,44 @@ function Clientes(props) {
     }
     const [tarimaAUX, setTarimaAUX] = useState('')
     const [indiceDeTarima2, setIndiceDeTarima] = useState('')
+    const [cliente , setCliente] = useState('')
 
-    async function agregarProducto(bandera, indice, indiceDeTarima) {
+    async function agregarTarima(bandera, indice, indiceDeTarima) {
+
         if (bandera) {
-            console.log(indiceDeTarima)
-            setIndiceDeTarima(indiceDeTarima)
-            setMaterial('vacio')
-            handleShow5()
-            setTarimaAUX(indice[0])
+            // console.log(tarima)
+            setTarimaAUX(tarima)
+            let data = {}
+            data[tarima] = true
+            const docRef = doc(db, "Clientes", cliente);
+            updateDoc(docRef,data).then(function (x) {
+                        // console.log("agregarTarima: Hecho")
+                    }
+                    )
+            handleClose2()
         } else {
-            if (material == 'vacio' || cantidad == undefined) {
-                handleClose5()
-            } else {
-                let DataAsubir = {
-                    Dimension: productos[material]['data']['Dimension'],
-                    Nombre: productos[material]['data']['Nombre'],
-                    Cantidad: cantidad
-                }
-                const docRef = doc(db, "Tarimas", tarimaAUX, 'Construccion', productos[material]['id']);
-                setDoc(docRef, DataAsubir).then(function (x) {
-                    let data = dataFilter;
-                    let auxTemp = data[indiceDeTarima2][tarimaAUX]
-                    auxTemp[productos[material]['id']] = DataAsubir
-                    data[indiceDeTarima2][tarimaAUX] = auxTemp
-                    setDataFilter(data)
-                    handleClose5()
-                }
-                )
-            }
+            // if (material == 'vacio' || cantidad == undefined) {
+            //     handleClose5()
+            // } else {
+            //     let DataAsubir = {
+            //         Dimension: productos[material]['data']['Dimension'],
+            //         Nombre: productos[material]['data']['Nombre'],
+            //         Cantidad: cantidad
+            //     }
+            //     const docRef = doc(db, "Tarimas", tarimaAUX, 'Construccion', productos[material]['id']);
+            //     setDoc(docRef, DataAsubir).then(function (x) {
+            //         let data = dataFilter;
+            //         let auxTemp = data[indiceDeTarima2][tarimaAUX]
+            //         auxTemp[productos[material]['id']] = DataAsubir
+            //         data[indiceDeTarima2][tarimaAUX] = auxTemp
+            //         setDataFilter(data)
+            //         handleClose5()
+            //     }
+            //     )
+            // }
 
         }
+        
     }
     let [nonbretem, setNonbretem] = useState('');
     let [secondIndex, setSecondIndex] = useState('');
@@ -283,7 +309,7 @@ function Clientes(props) {
         // let aux = filteredData;
         if (bandera) {
             setSecondIndex(indiceTari)
-            console.log(data, indiceTari)
+            // console.log(data, indiceTari)
             setNonbretem(Object.keys(data)[0])
             setIndexTem(indice)
             setDataOf(data[Object.keys(data)[0]][indice])
@@ -296,7 +322,7 @@ function Clientes(props) {
             //console.log(data,indexTem,nonbretem)
             if (data['Dimension'] == dimension && data['Nombre'] == nombre && data['Cantidad'] == cantidad) {
                 // Cambian Nada
-                console.log('Nada Actualizado')
+                // console.log('Nada Actualizado')
             } else {
                 var SoloCantidad = {
                     Cantidad: cantidad
@@ -418,13 +444,50 @@ function Clientes(props) {
 
     function onChangeSelect(event) {
         let valor = event.target.value;
-        setMaterial(valor)
+        setTarima(valor)
     }
     const filteredData = []
     const filteredData2 = allTarimas.filter((key) => Object.keys(key).includes(searchTerm.toLocaleUpperCase().trim().replaceAll(' ', '')) || searchTerm.length == 0);
 
     return (
         <>
+            <Modal show={show2} onHide={handleClose2}>
+                <Modal.Header className="TituloEditar" closeButton>
+                    <Modal.Title>Agregar nueva Tarima</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bodymodla" > Selecciona La Tarima que desea agregar.
+                    {
+                        <Table striped bordered hover className="tablaProductos table table-bordered border border-secondary">
+                            <thead>
+                                <tr>
+                                    <th>Tarima</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    <tr className="centrarfila">
+                                        <select id="select" onChange={onChangeSelect} name="Tarima">
+                                            <option key={'0.0'} value={'noVale'}>Selecciona uno</option>
+                                            {allIdTarimas.map((fila, indice) =>
+                                                <option key={fila['id']} value={fila['id']}>{fila}</option>
+                                            )}
+                                        </select>
+                                    </tr>
+                                }
+                            </tbody>
+                        </Table>
+                    }
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose5}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => { agregarTarima(true) }}>
+                        Agregar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header className="TituloEliminar" closeButton>
                     <Modal.Title>Eliminar Tarima</Modal.Title>
@@ -450,7 +513,7 @@ function Clientes(props) {
                     <Button variant="secondary" onClick={handleClose}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={() => { eliminarTarima(TarimaAEliminar, false)} }>
+                    <Button variant="primary" onClick={() => { eliminarTarima(TarimaAEliminar, false) }}>
                         Eliminar
                     </Button>
                 </Modal.Footer>
@@ -474,44 +537,49 @@ function Clientes(props) {
                         filteredData2.map((data) =>
                             Object.keys(data).map(nombreCLiente =>
                                 <Table id="tablaProductos" striped bordered hover className="tablaProductos table table-bordered border border-secondary">
-                                <thead>
-                                    <tr className="nombreTarima">
-                                        <th className="centarTitule" colSpan={3} >
-                                            Cliente:<br />
-                                            {nombreCLiente}
-                                        </th>
-                                        <th colSpan={2}>
-                                        
-                                            <div className="accionAtomar">
-                                                <p>Eliminar o Agregar</p>
-                                                <button id="cancelarButton" >X</button>
-                                                <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th colSpan={2}>Nombre</th>
-                                        <th>Identificador</th>
-                                        <th>Eliminar/Editar</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                         data[nombreCLiente].map((fila,indice) =>
-                                            < tr className="centrarfila">
-                                                <td key={`1`} colSpan={2} >{fila}</td>
-                                                <td key={`2`} >{nombreCLiente.substr(0, 2)+' '+fila}</td>
+                                    <thead>
+                                        <tr className="nombreTarima">
+                                            <th className="centarTitule" colSpan={3} >
+                                                Cliente:<br />
+                                                {nombreCLiente}
+                                            </th>
+                                            <th colSpan={2}>
                                                 <div className="accionAtomar">
-                                                    <button id="cancelarButton" onClick={()=>eliminarTarima(nombreCLiente, true,indice)}>X</button>
-                                                    <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button>
-                                                </div>
-                                            </tr>
-                                        )
-                                        
-                                    }
-                                </tbody>
+                                                    <p>Eliminar</p>
+                                                    <div className="px-3">
+                                                        <button id="cancelarButton" >X</button> <br />
+                                                    </div>
 
-                            </Table>
+                                                    <p>Agregar this</p>
+                                                    <div className="px-3">
+                                                        <button onClick={function (){handleShow2(); setCliente(nombreCLiente)}} id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan={2}>Nombre</th>
+                                            <th>Identificador</th>
+                                            <th>Eliminar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            data[nombreCLiente].map((fila, indice) =>
+                                                < tr className="centrarfila">
+                                                    <td key={`1`} colSpan={2} >{fila}</td>
+                                                    <td key={`2`} >{nombreCLiente.substr(0, 2) + ' ' + fila}</td>
+                                                    <div className="accionAtomar">
+                                                        <button id="cancelarButton" onClick={() => eliminarTarima(nombreCLiente, true, indice)}>X</button>
+                                                        {/* <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button> */}
+                                                    </div>
+                                                </tr>
+                                            )
+
+                                        }
+                                    </tbody>
+
+                                </Table>
                             )
                         )
                     }
