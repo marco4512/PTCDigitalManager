@@ -209,10 +209,14 @@ function Inventario(props) {
             })
         }
     }
-    async function editarProductoMejorado(data, bandera, indice) {
+    const [volTemp, setVolTemp] = useState("");
+    async function editarProductoMejorado(data, bandera, indice, volumen) {
         let aux = filteredData;
         if (bandera) {
+            
             ExtraerProveedores()
+            setVolTemp(data['Volumen'])
+            console.log("Vol: " + volTemp)
             setIndexTem(indice)
             console.log(indice)
             setDataOf(data)
@@ -223,16 +227,22 @@ function Inventario(props) {
             handleShow2()
 
         } else {
-            if (data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
+            if (data['Volumen'] == volTemp && data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
                 //console.log('No se edito nada')
                 handleClose2()
             } else {
                 console.log(Existencia)
+
+                var espAlm = String((Number(Existencia != '' ? Existencia : '0') * Number(volTemp != '' ? volTemp : '0')).toFixed(2));
+                var valorInv = String((Number(Existencia != '' ? Existencia : '0') * Number(Precio != '' ? Precio : '0.0')).toFixed(2));
+                
                 var productoEditado = {
                     Existencia: Existencia != '' ? Existencia : '0',
                     Precio: Precio != '' ? Precio : '0.0',
                     FechaEntrada: Fecha_ent,
-                    Proveedor: Proveedor
+                    Proveedor: Proveedor,
+                    EspacioEnAlmacen: (espAlm != ''? espAlm : '0'),
+                    ValorInventario: (valorInv != ''? valorInv : '0')
                 }
                 const docRef = doc(db, "Inventario", String(indexTem));
                 updateDoc(docRef, productoEditado).then(docRef => {
@@ -445,7 +455,7 @@ function Inventario(props) {
                                         <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
                                         <div className="accionAtomar">
                                             <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
-                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id']) }}><span > edit </span></button>
+                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id'], number['Volumen']) }}><span > edit </span></button>
                                         </div>
                                     </tr>
                                 )
