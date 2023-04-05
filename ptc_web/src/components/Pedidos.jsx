@@ -2,7 +2,7 @@ import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { query, where, getDocs, getFirestore, collection } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-
+import Table from 'react-bootstrap/Table';
 function Pedidos(props) {
     const navigate = useNavigate();
     const [email, setEmail] = useState(false);
@@ -131,8 +131,8 @@ function Pedidos(props) {
         construccion.map(function (material) {
             let productData = productos.filter(producto => producto[material[0]])
             console.log('Material: ', productData,
-                        ' CantidadTarimas: ', cantidadinput, 
-                        ' Cantidad de ese material: ', material[1])
+                ' CantidadTarimas: ', cantidadinput,
+                ' Cantidad de ese material: ', material[1])
         })
 
     }
@@ -178,21 +178,109 @@ function Pedidos(props) {
                 <button onClick={() => Navegar('proveedores')} id="prooveedores" className="buttonOpcion2">Proveedor</button>
                 <button onClick={() => Navegar('tarimas')} id="tarimas" className="buttonOpcion2">Tarimas</button>
             </div>
-            <select id="select" onChange={buscarTarima} name="proveedores">
-                <option key={'0.0'} value={'Cliente'}>Cliente</option>
-                {Object.keys(clientes[0]).map((fila, indice) =>
-                    < option key={indice} value={fila}>{fila}</option>
-                )}
-            </select >
-            <select id="select" onChange={SeSeleccionoTarima} name="proveedores">
-                <option key={'0.0'} value={'Tarima'}>Tarimas</option>
-                {tarimaFiltro.map((fila, indice) =>
-                    < option key={indice} value={fila}>{fila}</option>
-                )}
-            </select >
-            <label > Ingresa la cantidad</label>
-            <input type="number" onChange={onChangeCantidad} value={cantidadinput} />
-            <button onClick={() => presupuestar()}>Presupuesto</button>
+            <div className="contenedorPedidos">
+                <div className="top">
+                    <p className="tituloPedidos">Pedidos</p>
+                    <button className="botonPedidos">Nuevo Pedido</button>
+                    <div id="buscarPedido" className="group">
+                        <svg className="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                        <input placeholder="Search" type="search" className="input" />
+                    </div>
+                </div>
+                <br />
+                <Table id="tablaProductos" striped bordered hover className="tablaProductos numpedi table table-bordered border border-secondary">
+                    <thead className="headersTAble">
+                        <tr id="topOfDataPedido">
+                            <th  >Num.</th>
+                            <th id="labelNumero" ></th>
+                            <th>Cliente:</th>
+                            <th id="labelCliente" colSpan={2}> </th>
+                            <th colSpan={1} >Demanda:</th>
+                            <th id="labelDemanda" ></th>
+                            <th>Suma Pies:</th>
+                            <th id="labelPies" ></th>
+                            <th>
+                                <div className="accionAtomar" >
+                                    <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button>
+                                    <button id="cancelarButton" >X</button>
+                                </div>
+                            </th>
+                        </tr>
+
+                        <tr id="subHeader" >
+                            <th colSpan={4}>Datos de la Tarima</th>
+                            <th colSpan={8} >Datos del Pedido</th>
+                        </tr>
+                        <tr id="subHeader">
+
+                            <th >No Tarima</th>
+                            <th>Material</th>
+                            <th>Dimensión</th>
+                            <th>Qty</th>
+                            <th>TotalPiezas</th>
+                            <th>Pie Tabla</th>
+                            <th>Total Pies</th>
+                            <th>Stock Piezas</th>
+                            <th>Piezas x Pedir</th>
+                            <th>Proveedor</th>
+                        
+
+                        </tr>
+                    </thead>
+                    <tbody className="bodyTable">
+                        <tr className="centerXd">
+                            <th  > 45 x 48 R</th>
+                            <th>BARROTE</th>
+                            <th>1 1/8  X  3  1/4  X  48</th>
+                            <th>4</th>
+                            <th>11520</th>
+                            <th>1.2187</th>
+                            <th>14039</th>
+                            <th>9800</th>
+                            <th>1720</th>
+                            <select id="select" name="Tarima">
+                                <option key={'0.0'} value={'noVale'}>Selecciona uno</option>
+                                <option>Proveedor</option>
+                            </select>
+                        </tr>
+                        <tr className="centerXd">
+                            <th  > 45 x 48 R</th>
+                            <th>BARROTE</th>
+                            <th>1 1/8  X  3  1/4  X  48</th>
+                            <th>4</th>
+                            <th>11520</th>
+                            <th>1.2187</th>
+                            <th>14039</th>
+                            <th>9800</th>
+                            <th>1720</th>
+                            <select id="select" name="Tarima">
+                                <option key={'0.0'} value={'noVale'}>Selecciona uno</option>
+                                <option>Proveedor</option>
+                            </select>
+                        </tr>
+                        <tr className="centerXd">
+                            <th> 45 x 48 R</th>
+                            <th>BARROTE</th>
+                            <th>1 1/8  X  3  1/4  X  48</th>
+                            <th>4</th>
+                            <th>11520</th>
+                            <th>1.2187</th>
+                            <th>14039</th>
+                            <th>9800</th>
+                            <th>1720</th>
+                            <select id="select" name="Tarima">
+                                <option key={'0.0'} value={'noVale'}>Selecciona uno</option>
+                                <option>Proveedor</option>
+                            </select>
+
+
+                        </tr>
+
+                    </tbody>
+
+                </Table>
+            </div>
+
         </>
     );
 }
