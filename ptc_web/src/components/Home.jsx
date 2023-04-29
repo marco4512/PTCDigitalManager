@@ -5,10 +5,14 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import CardGroup from 'react-bootstrap/CardGroup';
 import Accordion from 'react-bootstrap/Accordion';
 import PTC from '../asserts/images/LogoNav.png';
+import Nav from './Nav.jsx';
+
 
 function Home() {
   return (
     <>
+    <Nav state={'login'}/>
+
       <div className="HomeContainer">
         <div className="App">
           <label className="Titulos">

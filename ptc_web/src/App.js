@@ -17,7 +17,7 @@ function App() {
   const [usuario, setUsuario] = useState(null);
   return (
     <>
-      <Nav/>
+     
       <Routes>
         <Route path='/' element={<Home setUsuario={setUsuario} />} />
         <Route path='/adDashboard' element={<AdminDashboard setUsuario={setUsuario} />} />

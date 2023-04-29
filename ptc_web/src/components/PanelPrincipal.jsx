@@ -1,95 +1,64 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { query, where, getDocs, getFirestore, collection } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
+import SubMenu from './SubMenu';
+import Nav from "./Nav.jsx";
+
 
 function PanelPrincipal(props) {
     const navigate = useNavigate();
-    const [email, setEmail] = useState(false);
-    const [primera_vez, setPrimera_vez] = useState(false);
-    var containerPrincial = document.getElementById('containerPrincial');
-    const inventario = () => {
-        navigate('/stock')
-    }
-    const Pedido = () => {
-        navigate('/pedido')
-    }
-    const Productos = () => {
-        navigate('/productos')
-    }
-    const Reportes = () => {
-        navigate('/reportes')
-    }
-    const PanelPrincipal = () => {
-        navigate('/principal')
-    }
+    const [rol, setRol] = useState('');
+    const auth = getAuth();
+    var db = getFirestore();
+    
+   
+   
     useEffect(() => {
-        let NavTemporal = document.getElementById('NavTemporal');
+        let Spinner = document.getElementById('Spinner');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
-                containerPrincial.style.display = 'none';
                 navigate('/login')
             }
             else {
-                setEmail(usuarioFirebase.email);
-                if (primera_vez == false) {
-                    setPrimera_vez(true);
-                    ObtenerNav(usuarioFirebase.email)
-                    //obteniendo_nombre(usuarioFirebase.email);
-                }
-                if (primera_vez) {
-                    console.log('ya se cargo');
-                }
-                //console.log(usuarioFirebase.email);
+                console.log('Deberia de pasar a block')
+                ExtraerRol(usuarioFirebase.email, Spinner).then(x => {
+                    if (Spinner) {
+                        Spinner.style.display = 'none';
+                        console.log('El rol',rol)
+                    }
+                })
             }
-            props.setUsuario(usuarioFirebase);
         });
     }, []);
 
-    async function ObtenerNav(email) {
-        var inventarioNav = document.getElementById('inventarioNav');
-        var Pedido = document.getElementById('pedidoNav');
-        var productosNav = document.getElementById('productosNav');
-        var reportesNav = document.getElementById('reportesNav');
-        var panelPrincipalNav = document.getElementById('panelPrincipalNav');
-        const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
+    async function ExtraerRol(email, Spinner) {
+        const q = query(collection(db, "Empleados"), where("email", "==", email));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            switch (doc.data().rol) {
-                case 'Admin':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.color = "white";
-                    panelPrincipalNav.style.color = "white";
-                    break
-                case 'Asistente':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.display = "none";
-                    panelPrincipalNav.style.display = "none";
-                    break
-
-            }
-        });
+            setRol(doc.data().rol)
+        })
     }
+    
 
     return (
         <>
-            <div id="containerPrincial" className="containerPanelPrincipal">
-                <div id="NavTemporal" className="NavTemporal">
-                    <button onClick={inventario} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                    <button onClick={Pedido} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                    <button onClick={Productos} id="productosNav" className="buttonOpcion2">Materiales</button>
-                    <button onClick={Reportes} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                    <button onClick={PanelPrincipal} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
+        <Nav state={'SingOut'}/>
+            <div id="Spinner" className="Loader">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
                 </div>
+            </div>
+            <div id="containerPrincial" className="containerPanelPrincipal">
+                <SubMenu Rol={rol} />
                 <h1 className="home">PanelPrincipal</h1>
                 <h1 className="text-center mx-auto">Nombre de Usuario</h1>
                 <br /><br /><br />
-
-
                 <div className="row text-center pb-5">
                     <div className="col-10">
                         <div>

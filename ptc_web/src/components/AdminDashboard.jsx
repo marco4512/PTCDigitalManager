@@ -2,6 +2,9 @@ import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { query, where, getDocs, getFirestore, collection } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import Nav from "./Nav.jsx";
+
+
 
 function AdminDashboard(props) {
     const navigate = useNavigate();
@@ -76,6 +79,7 @@ function AdminDashboard(props) {
     }
     return (
         <>
+        <Nav state={'SingOut'}/>
             <div id="NavTemporal" className="NavTemporal">
                 <button onClick={inventario} id="inventarioNav" className="buttonOpcion2">Inventario</button>
                 <button onClick={Pedido} id="pedidoNav" className="buttonOpcion2" >Pedido</button >

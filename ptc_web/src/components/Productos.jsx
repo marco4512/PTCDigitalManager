@@ -5,6 +5,9 @@ import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Nav from "./Nav.jsx";
+import SubMenu from './SubMenu.jsx';
+
 
 function Productos(props) {
 
@@ -24,23 +27,27 @@ function Productos(props) {
     const [dataOf, setDataOf] = useState([])
     const [indexTem, setIndexTem] = useState();
     const navigate = useNavigate();
-    const [email, setEmail] = useState(false);
-    const [primera_vez, setPrimera_vez] = useState(false);
     const [productos, setProductos] = useState([]);
+    const [rol, setRol] = useState('');
+    async function ExtraerRol(email) {
+        const q = query(collection(db, "Empleados"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            setRol(doc.data().rol)
+        })
+    }
+
     var filaVacia = [{
         'Dimension': '',
         'Nombre': '',
         'Volumen': ''
     }]
     const [productosAgregar, setProductosAgregar] = useState(filaVacia)
-    var containerPrincial = document.getElementById('containerPrincial');
+    
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
     const inventarioRef = collection(db, "Inventario");
-    function Navegar(lugar) {
-        navigate(`/${lugar}`)
-    }
-
+  
     function onChangeEditar(event) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
@@ -57,63 +64,29 @@ function Productos(props) {
                 break;
         }
     }
+
     function AñadirFila() {
         let nuevaData = filaVacia[0]
         setProductosAgregar([...productosAgregar, nuevaData])
     }
 
     useEffect(() => {
-
+        let Spinner = document.getElementById('Spinner');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
-                containerPrincial.style.display = 'none';
                 navigate('/login')
             }
             else {
-                setEmail(usuarioFirebase.email);
-                if (primera_vez == false || productos) {
-                    setPrimera_vez(true);
-                    ObtenerNav(usuarioFirebase.email)
-                    ExtraerProductos()
-                    //console.log('sin nada', productosAgregar)
-                }
-                if (primera_vez) {
-                    //console.log('ya se cargo');
-                }
+                ExtraerRol(usuarioFirebase.email).then(x => {
+                    if (Spinner) {
+                        ExtraerProductos().then(x => { Spinner.style.display = 'none'; })
+                    }
+                })
             }
-            props.setUsuario(usuarioFirebase);
         });
     }, []);
-    async function ObtenerNav(email) {
-        var inventarioNav = document.getElementById('inventarioNav');
-        var Pedido = document.getElementById('pedidoNav');
-        var productosNav = document.getElementById('productosNav');
-        var reportesNav = document.getElementById('reportesNav');
-        var panelPrincipalNav = document.getElementById('panelPrincipalNav');
-        var prooveedores = document.getElementById('prooveedores');
-        
-        const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            switch (doc.data().rol) {
-                case 'Admin':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.color = "white";
-                    panelPrincipalNav.style.color = "white";
-                    prooveedores.style.color = "white";
-                    break
-                case 'Asistente':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.display = "none";
-                    panelPrincipalNav.style.display = "none";
-                    break
-            }
-        });
-    }
+
+
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearchChange = (event) => {
@@ -149,9 +122,6 @@ function Productos(props) {
         })
 
     }
-
-
-
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
         let alldata = []
@@ -236,12 +206,9 @@ function Productos(props) {
             handleShow3();
         }, .1);
     }
-
     function onChangeDimension(event) {
         let valor = event.target.value;
         let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        //console.log(productosAgregar)
         productosAgregar[indice]['Dimension'] = valor;
         setProductosAgregar([...productosAgregar])
     }
@@ -272,7 +239,18 @@ function Productos(props) {
     );
     return (
         <>
-
+          <div id="Spinner" className="Loader">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <Nav state={'SingOut'} />
+            <SubMenu Rol={rol} />
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header className="TituloEliminar" closeButton>
                     <Modal.Title>Eliminar Producto</Modal.Title>
@@ -282,7 +260,7 @@ function Productos(props) {
                         <thead>
                             <tr>
                                 <th>Dimensión</th>
-                               
+
                                 <th>Nombre</th>
                                 <th>Volumen</th>
                             </tr>
@@ -291,7 +269,7 @@ function Productos(props) {
                             {
                                 <tr className="centrarfila">
                                     <td key={1} >{dataOf['Dimension']}</td>
-                                   
+
                                     <td key={2} >{dataOf['Nombre']}</td>
                                     <td key={3} >{dataOf['Volumen']}</td>
                                 </tr>
@@ -319,7 +297,7 @@ function Productos(props) {
                         <thead>
                             <tr>
                                 <th>Dimensión</th>
-                           
+
                                 <th>Nombre</th>
                                 <th>Volumen</th>
                             </tr>
@@ -329,7 +307,7 @@ function Productos(props) {
 
                                 <tr className="centrarfila">
                                     <td key={1} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='dimension' value={dimension} /></td>
-                                   
+
                                     <td key={2} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='nombre' value={nombre} /></td>
                                     <td key={3} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='volumen' value={volumen} /></td>
                                 </tr>
@@ -369,7 +347,7 @@ function Productos(props) {
                                     <tbody>
                                         <tr className="centrarfila">
                                             <td key={1} ><input className="inputEditar" name={index} onChange={onChangeDimension} required type="text" value={keys['Dimension']} /></td>
-                                           
+
                                             <td key={3} ><input className="inputEditar" name={index} onChange={onChangeNombre} required type="text" value={keys['Nombre']} /></td>
                                             <td key={4} ><input className="inputEditar" name={index} onChange={onChangeVolumen} required type="text" value={keys['Volumen']} /></td>
                                             <div className="accionAtomar">
@@ -392,15 +370,7 @@ function Productos(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div id="NavTemporal" className="NavTemporal">
-
-            <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Material</button>
-                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-                <button onClick={() => Navegar('proveedores')} id="prooveedores" className="buttonOpcion2">Proveedor</button>
-            </div>
+           
             <div className="tituloProdi">
                 <h1>Material</h1>
 
@@ -411,7 +381,7 @@ function Productos(props) {
                         <thead>
                             <tr>
                                 <th>Dimensión</th>
-                          
+
                                 <th>Nombre</th>
                                 <th>Volumen</th>
                                 <th>Acción</th>
@@ -422,7 +392,7 @@ function Productos(props) {
                                 filteredData.map((number, indice) =>
                                     <tr className="centrarfila">
                                         <td key={`1.${indice}`} >{number['data']['Dimension']}</td>
-                                       
+
                                         <td key={`3.${indice}`} >{number['data']['Nombre']}</td>
                                         <td key={`4.${indice}`} >{number['data']['Volumen']}</td>
                                         <div className="accionAtomar">

@@ -5,13 +5,15 @@ import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Nav from "./Nav.jsx";
+import SubMenu from './SubMenu.jsx';
+
 
 function Proveedores(props) {
 
     const [Nombre, setNombre] = useState();
     const [Encargado, setEncargado] = useState();
     const [Contacto, setContacto] = useState();
-
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -24,23 +26,17 @@ function Proveedores(props) {
     const [dataOf, setDataOf] = useState([])
     const [indexTem, setIndexTem] = useState();
     const navigate = useNavigate();
-    const [email, setEmail] = useState(false);
-    const [primera_vez, setPrimera_vez] = useState(false);
     const [productos, setProductos] = useState([]);
+    const [rol, setRol] = useState('');
     var filaVacia = [{
         'Dimension': '',
         'Nombre': '',
         'Volumen': ''
     }]
     const [productosAgregar, setProductosAgregar] = useState(filaVacia)
-    var containerPrincial = document.getElementById('containerPrincial');
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
     const inventarioRef = collection(db, "Proveedores");
-    function Navegar(lugar) {
-        navigate(`/${lugar}`)
-    }
-
     function onChangeEditar(event) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
@@ -61,59 +57,30 @@ function Proveedores(props) {
         let nuevaData = filaVacia[0]
         setProductosAgregar([...productosAgregar, nuevaData])
     }
-
+    async function ExtraerRol(email) {
+        const q = query(collection(db, "Empleados"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            setRol(doc.data().rol)
+        })
+    }
     useEffect(() => {
-
+        let Spinner = document.getElementById('Spinner');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
-                containerPrincial.style.display = 'none';
                 navigate('/login')
             }
             else {
-                setEmail(usuarioFirebase.email);
-                if (primera_vez == false || productos) {
-                    setPrimera_vez(true);
-                    ObtenerNav(usuarioFirebase.email)
-                    ExtraerProductos()
-                    //console.log('sin nada', productosAgregar)
-                }
-                if (primera_vez) {
-                    //console.log('ya se cargo');
-                }
+                ExtraerRol(usuarioFirebase.email).then(x => {
+                    if (Spinner) {
+                        ExtraerProductos().then(x => { Spinner.style.display = 'none'; })
+                    }
+                })
             }
-            props.setUsuario(usuarioFirebase);
+
         });
     }, []);
-    async function ObtenerNav(email) {
-        var inventarioNav = document.getElementById('inventarioNav');
-        var Pedido = document.getElementById('pedidoNav');
-        var productosNav = document.getElementById('productosNav');
-        var reportesNav = document.getElementById('reportesNav');
-        var panelPrincipalNav = document.getElementById('panelPrincipalNav');
-        var prooveedores = document.getElementById('prooveedores');
 
-        const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            switch (doc.data().rol) {
-                case 'Admin':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.color = "white";
-                    panelPrincipalNav.style.color = "white";
-                    prooveedores.style.color = "white";
-                    break
-                case 'Asistente':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.display = "none";
-                    panelPrincipalNav.style.display = "none";
-                    break
-            }
-        });
-    }
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearchChange = (event) => {
@@ -123,7 +90,7 @@ function Proveedores(props) {
         const querySnapshot = await getDocs(inventarioRef);
         const totalDocumentos = querySnapshot.size;
         productosAgregar.map(function (fila, index) {
-            const documento = { 
+            const documento = {
                 Nombre: fila['Nombre'],
                 Encargado: fila['Encargado'],
                 Contacto: fila['Contacto'],
@@ -142,9 +109,6 @@ function Proveedores(props) {
         })
 
     }
-
-
-
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Proveedores"));
         let alldata = []
@@ -161,7 +125,6 @@ function Proveedores(props) {
         setProductos(alldata)
         console.log(alldata)
     }
-
     async function eliminarMejorado(data, bandera, indice) {
         let aux = filteredData;
         if (bandera) {
@@ -256,7 +219,18 @@ function Proveedores(props) {
     );
     return (
         <>
-
+            <div id="Spinner" className="Loader">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <Nav state={'SingOut'} />
+            <SubMenu Rol={rol} />
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header className="TituloEliminar" closeButton>
                     <Modal.Title>Eliminar Producto</Modal.Title>
@@ -370,18 +344,8 @@ function Proveedores(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div id="NavTemporal" className="NavTemporal">
-
-                <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Material</button>
-                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-                <button onClick={() => Navegar('proveedores')} id="prooveedores" className="buttonOpcion2">Proveedor</button>
-            </div>
             <div className="tituloProdi">
                 <h1>Proveedores</h1>
-
             </div>
             <div className="contenidoTotal">
                 <div className="TablaCont">

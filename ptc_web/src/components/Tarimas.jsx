@@ -5,6 +5,9 @@ import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Nav from "./Nav.jsx";
+import SubMenu from './SubMenu.jsx';
+
 
 function Tarimas(props) {
     const [tempTarima, setTempTarima] = useState([]);
@@ -32,22 +35,16 @@ function Tarimas(props) {
     const [antesEliminar, setAntesEliminar] = useState([]);
     const [indexTem, setIndexTem] = useState();
     const navigate = useNavigate();
-    const [email, setEmail] = useState(false);
-    const [primera_vez, setPrimera_vez] = useState(false);
     const [productos, setProductos] = useState([]);
+    const [rol, setRol] = useState('');
     var filaVacia = [{
         'Select': '',
         'Cantidad': ''
     }]
     const [productosAgregar, setProductosAgregar] = useState(filaVacia)
-    var containerPrincial = document.getElementById('containerPrincial');
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
     const inventarioRef = collection(db, "Inventario");
-    function Navegar(lugar) {
-        navigate(`/${lugar}`)
-    }
-
     function onChangeEditar(event) {
         let etiqueta = event.target.name;
         switch (etiqueta) {
@@ -70,54 +67,32 @@ function Tarimas(props) {
         let nuevaData = filaVacia[0]
         setProductosAgregar([...productosAgregar, nuevaData])
     }
+    async function ExtraerRol(email) {
+        const q = query(collection(db, "Empleados"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            setRol(doc.data().rol)
+        })
+    }
 
     useEffect(() => {
+        let Spinner = document.getElementById('Spinner');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
-                containerPrincial.style.display = 'none';
                 navigate('/login')
             }
             else {
-                setEmail(usuarioFirebase.email);
-                ObtenerNav(usuarioFirebase.email)
-                ExtraerProductos()
-                ExtraerTarimas().then(x => x)
-                console.log('vacio->', dataFilter)
+                ExtraerRol(usuarioFirebase.email).then(x => {
+                    if (Spinner) {
+                        ExtraerProductos().then(x => x)
+                        ExtraerTarimas().then(x => { Spinner.style.display = 'none'; })
+                    }
+                })
             }
-            props.setUsuario(usuarioFirebase);
+
         });
     }, []);
-    async function ObtenerNav(email) {
-        var inventarioNav = document.getElementById('inventarioNav');
-        var Pedido = document.getElementById('pedidoNav');
-        var productosNav = document.getElementById('productosNav');
-        var reportesNav = document.getElementById('reportesNav');
-        var panelPrincipalNav = document.getElementById('panelPrincipalNav');
-        var prooveedores = document.getElementById('prooveedores');
-        var tarimas = document.getElementById('tarimas');
-        const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            switch (doc.data().rol) {
-                case 'Admin':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.color = "white";
-                    panelPrincipalNav.style.color = "white";
-                    prooveedores.style.color = "white";
-                    tarimas.style.color ='white';
-                    break
-                case 'Asistente':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.display = "none";
-                    panelPrincipalNav.style.display = "none";
-                    break
-            }
-        });
-    }
+   
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearchChange = (event) => {
@@ -151,8 +126,6 @@ function Tarimas(props) {
         console.log(auxData)
 
     }
-
-
     async function ExtraerTarimas() {
         var tarimas = []
         const subColRef = collection(db, "Tarimas");
@@ -181,7 +154,6 @@ function Tarimas(props) {
             setDataFilter(prev => [...prev, salida])
         }
     }
-
     async function ExtraerProductos() {
         const querySnapshot = await getDocs(collection(db, "Inventario"));
         let alldata = []
@@ -351,7 +323,7 @@ function Tarimas(props) {
                     }).catch(error => {
                         console.log(error);
                     })
-                    let todo={
+                    let todo = {
                         Cantidad: cantidad,
                         Nombre: nombre,
                         Dimension: dimension
@@ -379,22 +351,6 @@ function Tarimas(props) {
             handleShow3();
         }, .1);
     }
-
-    function onChangeDimension(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        //console.log(productosAgregar)
-        productosAgregar[indice]['Dimension'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
-    function onChangeMaterial(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Material'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
     const [nombreTarimados, setNombreTarimados] = useState('')
     function onChangeNombreTarima(event) {
         let valor = event.target.value;
@@ -412,24 +368,26 @@ function Tarimas(props) {
         productosAgregar[indice]['Select'] = valor;
         setProductosAgregar([...productosAgregar])
     }
-    function onChangeVolumen(event) {
-        let valor = event.target.value;
-        let indice = event.target.name;
-        //console.log('Este es el indice', indice)
-        productosAgregar[indice]['Volumen'] = valor;
-        setProductosAgregar([...productosAgregar])
-    }
     function onChangeSelect(event) {
         let valor = event.target.value;
         setMaterial(valor)
     }
-
     const filteredData = dataFilter.filter((key) => Object.keys(key)[0].toLowerCase().trim().replaceAll(' ', '').includes(searchTerm.toLowerCase().trim().replaceAll(' ', '')));
-
-
-
     return (
         <>
+            <div id="Spinner" className="Loader">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <Nav state={'SingOut'} />
+            <SubMenu Rol={rol} />
+
             <Modal show={show5} onHide={handleClose5}>
                 <Modal.Header className="TituloEditar" closeButton>
                     <Modal.Title>Agregar nuevo Material</Modal.Title>
@@ -643,15 +601,7 @@ function Tarimas(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div id="NavTemporal" className="NavTemporal">
-                <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Material</button>
-                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-                <button onClick={() => Navegar('proveedores')} id="prooveedores" className="buttonOpcion2">Proveedor</button>
-                <button onClick={() => Navegar('tarimas')} id="tarimas" className="buttonOpcion2">Tarimas</button>
-            </div>
+             
             <div className="tituloProdi">
                 <h1>Tarimas</h1>
 

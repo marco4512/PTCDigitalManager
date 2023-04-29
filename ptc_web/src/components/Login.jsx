@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { doc, getDocs, getFirestore, collection } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
+import Nav from "./Nav.jsx";
 
 function Login(props) {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ function Login(props) {
   }
   return (
     <>
+    <Nav state={'login'}/>
       <div className="pricipal" >
         <Form className="formularioXD" >
           <Form.Group className="mb-3" controlId="formBasicEmail">

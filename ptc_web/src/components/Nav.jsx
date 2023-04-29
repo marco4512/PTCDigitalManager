@@ -1,37 +1,34 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-function Nav() {
+import { getAuth, signOut } from "firebase/auth";
+function Nav(props) {
     const navigate = useNavigate();
-    const login = () => {
-        navigate('/login')
+    const auth = getAuth();
+
+    function Navegar(pagina) {
+        if (pagina == 'SingOut') {
+            SingOut()
+
+        } else {
+            navigate(`/${pagina}`)
+        }
     }
-    const inventario = () => {
-        navigate('/stock')
+
+    function SingOut() {
+        signOut(auth).then(() => {
+        }).catch((error) => {
+        });
     }
-    const Pedido = () => {
-        navigate('/pedido')
-    }
-    const Productos = () => {
-        navigate('/productos')
-    }
-    const Reportes = () => {
-        navigate('/reportes')
-    }
-    const PanelPrincipal = () => {
-        navigate('/principal')
-    }
-    const Home = () => {
-        navigate('/')
-    }
+
     return (
         <>
+        
             <div className="navBar">
-                <div onClick={Home} className="LogoEmpresa"></div>
+                <div onClick={() => Navegar('Home')} className="LogoEmpresa"></div>
                 <div className="Separador">
                 </div>
                 <div className="PartesPagina">
-                    <button onClick={login} id="Login" className="buttonOpcion">Login</button>
-                    
+                    <button onClick={()=>Navegar(props.state == 'login' ? 'login' : 'SingOut')} id="Login" className="buttonOpcion">{props.state == 'login' ? 'Login' : 'SingOut'}</button>
                 </div>
             </div>
         </>

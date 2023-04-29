@@ -5,7 +5,12 @@ import { getAuth } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Nav from "./Nav.jsx";
+import SubMenu from './SubMenu.jsx';
+
+
 function Inventario(props) {
+    const [rol, setRol] = useState('');
     const [Existencia, setExistencia] = useState('');
     const [Precio, setPrecio] = useState();
     const [Fecha_ent, setFecha_ent] = useState();
@@ -23,8 +28,6 @@ function Inventario(props) {
     const [dataOf, setDataOf] = useState([])
     const [indexTem, setIndexTem] = useState();
     const navigate = useNavigate();
-    const [email, setEmail] = useState(false);
-    const [primera_vez, setPrimera_vez] = useState(false);
     const [productos, setProductos] = useState([]);
     var filaVacia = [{
         'Dimension': '',
@@ -39,7 +42,8 @@ function Inventario(props) {
         }
     }
     const [productosAgregar, setProductosAgregar] = useState(filaVacia)
-    var containerPrincial = document.getElementById('containerPrincial');
+   
+    
     var db = getFirestore();
     const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
     function Navegar(lugar) {
@@ -88,57 +92,32 @@ function Inventario(props) {
         let nuevaData = filaVacia[0]
         setProductosAgregar([...productosAgregar, nuevaData])
     }
+    async function ExtraerRol(email) {
+        const q = query(collection(db, "Empleados"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            setRol(doc.data().rol)
+        })
+    }
 
     useEffect(() => {
-
+        let Spinner = document.getElementById('Spinner');
         getAuth().onAuthStateChanged((usuarioFirebase) => {
             if (usuarioFirebase == null) {
-                containerPrincial.style.display = 'none';
                 navigate('/login')
             }
             else {
-                setEmail(usuarioFirebase.email);
-                if (primera_vez == false || productos) {
-                    //console.log('cargando la primera vez')
-                    setPrimera_vez(true);
-                    ObtenerNav(usuarioFirebase.email)
-                    ExtraerProductos()
-                    //console.log('sin nada', productosAgregar)
-                }
-                if (primera_vez) {
-                    //console.log('ya se cargo');
-                }
+                ExtraerRol(usuarioFirebase.email).then(x => {
+                    if (Spinner) {
+                        ExtraerProductos().then(x => { Spinner.style.display = 'none'; })
+                    }
+                })
+
+
             }
-            props.setUsuario(usuarioFirebase);
         });
     }, []);
-    async function ObtenerNav(email) {
-        var inventarioNav = document.getElementById('inventarioNav');
-        var Pedido = document.getElementById('pedidoNav');
-        var productosNav = document.getElementById('productosNav');
-        var reportesNav = document.getElementById('reportesNav');
-        var panelPrincipalNav = document.getElementById('panelPrincipalNav');
-        const q = query(collection(getFirestore(), "Empleados"), where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            switch (doc.data().rol) {
-                case 'Admin':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.color = "white";
-                    panelPrincipalNav.style.color = "white";
-                    break
-                case 'Asistente':
-                    inventarioNav.style.color = "white";
-                    Pedido.style.color = "white";
-                    productosNav.style.color = "white";
-                    reportesNav.style.display = "none";
-                    panelPrincipalNav.style.display = "none";
-                    break
-            }
-        });
-    }
+
     async function UpdateProductos() {
         const querySnapshot = await getDocs(collection(db, "Productos"));
         querySnapshot.forEach((documento) => {
@@ -182,38 +161,11 @@ function Inventario(props) {
         console.log(alldata)
 
     }
-
-    async function eliminarMejorado(data, bandera, indice) {
-        let aux = filteredData;
-        if (bandera) {
-            setIndexTem(indice)
-            setDataOf(data)
-            handleShow()
-        } else {
-            delete aux[indexTem];
-            //console.log('data :', aux)
-            //const docRef = doc(db, "Productos", "aVBc13bTQxQk9SZFL7wT");
-            const emptyIndex = aux.indexOf(undefined);
-            //console.log('undefined', emptyIndex)
-            let formato = { 'Productos': [] }
-            aux.map(x => formato['Productos'].push(x))
-            //console.log(formato)
-            setDoc(docRef, formato).then(docRef => {
-                //console.log("Entire Document has been updated successfully");
-                ExtraerProductos().then(function (x) {
-                    handleClose()
-                    setIndexTem()
-                })
-            }).catch(error => {
-                console.log(error);
-            })
-        }
-    }
     const [volTemp, setVolTemp] = useState("");
     async function editarProductoMejorado(data, bandera, indice, volumen) {
         let aux = filteredData;
         if (bandera) {
-            
+
             ExtraerProveedores()
             setVolTemp(data['Volumen'])
             console.log("Vol: " + volTemp)
@@ -235,14 +187,14 @@ function Inventario(props) {
 
                 var espAlm = String((Number(Existencia != '' ? Existencia : '0') * Number(volTemp != '' ? volTemp : '0')).toFixed(2));
                 var valorInv = String((Number(Existencia != '' ? Existencia : '0') * Number(Precio != '' ? Precio : '0.0')).toFixed(2));
-                
+
                 var productoEditado = {
                     Existencia: Existencia != '' ? Existencia : '0',
                     Precio: Precio != '' ? Precio : '0.0',
                     FechaEntrada: Fecha_ent,
                     Proveedor: Proveedor,
-                    EspacioEnAlmacen: (espAlm != ''? espAlm : '0'),
-                    ValorInventario: (valorInv != ''? valorInv : '0')
+                    EspacioEnAlmacen: (espAlm != '' ? espAlm : '0'),
+                    ValorInventario: (valorInv != '' ? valorInv : '0')
                 }
                 const docRef = doc(db, "Inventario", String(indexTem));
                 updateDoc(docRef, productoEditado).then(docRef => {
@@ -268,7 +220,6 @@ function Inventario(props) {
             handleShow3();
         }, .1);
     }
-
     function onChangeDimension(event) {
         let valor = event.target.value;
         let indice = event.target.name;
@@ -305,11 +256,21 @@ function Inventario(props) {
 
 
     );
-
-
+   
     return (
         <>
-
+            <div id="Spinner" className="Loader">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <Nav state={'SingOut'} />
+            <SubMenu Rol={rol} />
 
             <Modal size="lg" centered show={show2} onHide={handleClose2}>
                 <Modal.Header className="TituloEditar" closeButton>
@@ -399,14 +360,8 @@ function Inventario(props) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <div id="NavTemporal" className="NavTemporal">
-                <button onClick={() => Navegar('stock')} id="inventarioNav" className="buttonOpcion2">Inventario</button>
-                <button onClick={() => Navegar('pedido')} id="pedidoNav" className="buttonOpcion2" >Pedido</button >
-                <button onClick={() => Navegar('productos')} id="productosNav" className="buttonOpcion2">Material</button>
-                <button onClick={() => Navegar('reportes')} id="reportesNav" className="buttonOpcion2">Reportes</button>
-                <button onClick={() => Navegar('principal')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-                <button onClick={() => Navegar('proveedores')} id="panelPrincipalNav" className="buttonOpcion2">PanelPrincipal</button>
-            </div>
+           
+
             <div className="InventarioTop">
                 <div className="tituloInve">
                     <h3>Inventario</h3>
@@ -460,7 +415,7 @@ function Inventario(props) {
                                     </tr>
                                 )
                             }
-                        </tbody>Existencia
+                        </tbody>
                     </Table>
                 </div>
 
