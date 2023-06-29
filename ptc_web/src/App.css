@@ -465,6 +465,14 @@
   justify-content: space-between;
   font-size: 20px;
 }
+.elminarbodymodla{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 20px;
+  background-color:  #EC7063;
+}
 
 .TituloEliminar {
   background-color: #EC7063;
