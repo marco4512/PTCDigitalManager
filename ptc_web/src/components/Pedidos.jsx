@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { query, doc, where, setDoc, getDocs, getFirestore, collection, deleteDoc } from "firebase/firestore";
+import { query, doc, getDoc, where, setDoc, getDocs, getFirestore, collection, deleteDoc, documentId, updateDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
@@ -8,6 +8,7 @@ import Modal from 'react-bootstrap/Modal';
 import Nav from "./Nav.jsx";
 import SubMenu from './SubMenu.jsx';
 import { Toaster, toast } from 'sonner';
+import html2pdf from 'html2pdf.js';
 
 function Pedidos(props) {
     const navigate = useNavigate();
@@ -21,12 +22,48 @@ function Pedidos(props) {
     const [showDelate, setShowDelate] = useState(false);
 
     function handleShowDelate(allData) {
+        let id = Object.keys(allData)[0]
+        setStatus(allData[id]["estado"] = allData[id]["estado"] === undefined ? "pendiente" : allData[id]["estado"]);
+        console.log("El valor es:   ", allData[id]);
+       
+        let data = allData[id].pedido
+        let pedidos = Object.keys(data)
+
+        console.log(data)
+        data.map((fila,item) => {
+            cargar(item, fila['estado'])
+        })
+        console.log(selectedRows)
+
         setShowDelate(true);
         setDataDelate(allData);
 
     };
+    const handleCloseDelate = async (indiceDocumento) => {
+        try {
+            console.log("Cerrado");
+        } catch {
+            console.log("Error");
+        }
+        setShowDelate(false);
+    }
 
-    const handleCloseDelate = () => setShowDelate(false);
+    const handleCloseGuardar = async (indiceDocumento) => {
+        try {
+            const documentoRef = doc(db, "Pedidos", indiceDocumento);
+            await updateDoc(documentoRef, {
+                estado: status
+            });
+            
+            //pendiente
+            actualizarPedido(indiceDocumento)
+            console.log('Documento creado o actualizado con éxito.',status);
+        } catch {
+            console.log("Error");
+        }
+        setShowDelate(false);
+    }
+
 
 
     var db = getFirestore();
@@ -209,6 +246,7 @@ function Pedidos(props) {
 
 
             let salidaFormateada = {
+                'estado': status,
                 'Cliente': clienteSeleccionado,
                 'Tarima': TarimaSeleccionada,
                 'Material': productData[0][idProducto]['Nombre'],
@@ -323,9 +361,342 @@ function Pedidos(props) {
     const handleEditShow = () => setShowEdit(true);
 
 
+    //Estado de pedido
+    const [status, setStatus] = useState('pendiente');
+    const  handleStatusChange = (event) => {
+        setStatus(event.target.value)
+    };
+    useEffect(() => {
+        console.log(status); // Esto se ejecutará cada vez que el estado 'status' cambie
+        if (status == 'devuelto' && selectedRows.length === 0){
+            handleSelectAll({ target: { checked: true } })
+            console.log("selectedRow",selectedRows.length)
+            // setStatus('realizado')
+        }else{
+            // if(selectedRows.length !== 0)setStatus('devuelto')
+        }
+        if (status != 'devuelto'){
+            handleSelectAll({ target: { checked: false } })
+        }
+
+        if (selectedRows.length === 1) {
+            setStatus('realizado')
+        }
+
+
+        // if (status == 'devuelto' && selectedRows.length !== 0) {
+        //     setStatus('devuelto')
+        // }
+        // if (status == 'devuelto' && selectedRows.length === 0) {
+        //     setStatus('realizado')
+        // }
+
+
+        // if (status == 'devuelto' && selectedRows.length === 0){
+        //     handleSelectAll({ target: { checked: true } })
+        // }else{
+           
+        //         handleSelectAll({ target: { checked: false } })
+        // }
+        
+    }, [status]); 
+
+    const generatePDF = () => {
+        const fechaHoraActual = new Date();
+        const fecha = fechaHoraActual.toLocaleDateString().replaceAll('/', '-');
+        const hora = fechaHoraActual.toLocaleTimeString().replaceAll(':', '-');
+
+        // Crear el nombre de archivo con fecha y hora
+        const opt = {
+            margin: 10,
+            filename: `reporte_pedidos ${fecha} ${hora}.pdf`,
+            image: { type: 'png', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        };
+
+        const element = document.getElementById('pdf-container');
+        const table = document.querySelector('.numpedi');
+        table.style.width = '100%'; // Ajustar el ancho de la tabla al 100%
+        table.style.tableLayout = 'fixed'; // Ajustar el layout de la tabla
+
+        html2pdf().set(opt).from(element).save();
+    };
+
+
+    // const [selectAll, setSelectAll] = useState(false);
+    // const [selectedRows, setSelectedRows] = useState([]);
+
+    // const handleSelectAll = (event) => {
+    //     const checkbox = event.target;
+
+    //     if (checkbox.checked) {
+    //         alert("Seleccion de todos")
+    //         setSelectAll(true)
+    //     } else {
+    //         setSelectAll(false)
+    //         alert("Se quita el check")
+    //         // El checkbox se ha desmarcado
+    //         // Realizar otras acciones aquí
+    //     }
+    // };
+
+    const handleSelectRow = (row) => {
+    };
+
+    async function test(indiceDocumento) {
+        // console.log("Filas seleccionadas: ",selectedRows)
+        // actualizarPedido(indiceDocumento)
+
+        const pedidoData = {
+            "Demanda": "33",
+            "SumaPies": "1468.02",
+            "Tarima": "46 x 63 T",
+            "TotalCosto": "43147.50",
+            "cliente": "JAYCOM",
+            "costoMaterial": "32140.00",
+            "costoStock": "11007.50",
+            "estado": "proceso",
+            "fecha": "17/7/2023",
+            "pedido": [
+                {
+                    "CantidadDeTarimas": "33",
+                    "CantidadPorMaterial": "11",
+                    "Cliente": "JAYCOM",
+                    "Dimension": "5/8 x 3 1/4 x 46",
+                    "InversionDeStock": "4000",
+                    "InversionPorMaterial": "14150",
+                    "Material": "TABLA ",
+                    "PieTabla": "0.6488",
+                    "Piezas a pedir": "283",
+                    "Precio": "50",
+                    "Proveedor": "TriPlaynet",
+                    "StockPiezas": "80",
+                    "Tarima": "46 x 63 T",
+                    "TotalDeInversion": "18150",
+                    "TotalPies": "235.5144",
+                    "TotalPiezas": "363"
+                },
+                {
+                    "CantidadDeTarimas": "33",
+                    "CantidadPorMaterial": "8",
+                    "Cliente": "JAYCOM",
+                    "Dimension": "5/8 x 3 1/4 x 63 ",
+                    "InversionDeStock": "3200",
+                    "InversionPorMaterial": "7360",
+                    "Material": "TABLA",
+                    "PieTabla": "0.8886",
+                    "Piezas a pedir": "184",
+                    "Precio": "40",
+                    "Proveedor": "TresMaderas",
+                    "StockPiezas": "80",
+                    "Tarima": "46 x 63 T",
+                    "TotalDeInversion": "10560",
+                    "TotalPies": "234.5904",
+                    "TotalPiezas": "264"
+                },
+                {
+                    "CantidadDeTarimas": "33",
+                    "CantidadPorMaterial": "10",
+                    "Cliente": "JAYCOM",
+                    "Dimension": "5/8 x 3 1/4 x 57",
+                    "InversionDeStock": "1435",
+                    "InversionPorMaterial": "5330",
+                    "Material": "TABLA ",
+                    "PieTabla": "0.804",
+                    "Piezas a pedir": "260",
+                    "Precio": "20.5",
+                    "Proveedor": "TresMaderas",
+                    "StockPiezas": "70",
+                    "Tarima": "46 x 63 T",
+                    "TotalDeInversion": "6765",
+                    "TotalPies": "265.32",
+                    "TotalPiezas": "330"
+                },
+                {
+                    "CantidadDeTarimas": "33",
+                    "CantidadPorMaterial": "9",
+                    "Cliente": "JAYCOM",
+                    "Dimension": "3 x 3 x 5",
+                    "InversionDeStock": "640",
+                    "InversionPorMaterial": "5300",
+                    "Material": "TACON",
+                    "PieTabla": "1.3",
+                    "Piezas a pedir": "265",
+                    "Precio": "20",
+                    "Proveedor": "WoodenUno",
+                    "StockPiezas": "32",
+                    "Tarima": "46 x 63 T",
+                    "TotalDeInversion": "5940",
+                    "TotalPies": "386.1",
+                    "TotalPiezas": "297"
+                },
+                {
+                    "CantidadDeTarimas": "33",
+                    "CantidadPorMaterial": "105",
+                    "Cliente": "JAYCOM",
+                    "Dimension": "2\" CAL 92\"",
+                    "InversionDeStock": "1732.5",
+                    "InversionPorMaterial": "0",
+                    "Material": "CLAVO",
+                    "PieTabla": "0.1",
+                    "Piezas a pedir": "0",
+                    "Precio": "0.5",
+                    "Proveedor": "TresMaderas",
+                    "StockPiezas": "8000",
+                    "Tarima": "46 x 63 T",
+                    "TotalDeInversion": "1732.5",
+                    "TotalPies": "346.5",
+                    "TotalPiezas": "3465"
+                }
+            ]
+        };        
+    
+        try {
+            const pedidoRef = doc(db, "Pedidos", "2"); // Referencia al documento con ID 2
+            await setDoc(pedidoRef, pedidoData); // Agregar el documento con los datos
+            console.log("Pedido agregado exitosamente a Firebase.");
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    // function handleCheckboxChange(event, fila, item) {
+    //     const checkbox = event.target;
+    //     console.log("Fila: ", fila);
+    //     console.log("Item: ", item);
+
+    //     if (checkbox.checked) {
+    //         selectedRows.push(fila);
+    //     } else {
+    //         const index = selectedRows.indexOf(fila);
+    //         if (index !== -1) {
+    //             selectedRows.splice(index, 1);
+    //         }
+    //     }
+    // }
+
+
+
+
+
+
+    // async function actualizarPedido(idPedido, idsSubpedidos) {
+        async function actualizarPedido(indiceDocumento) {
+            const idsSubpedidos = selectedRows; // IDs de subpedidos a actualizar
+            try {
+                const pedidoRef = doc(db, "Pedidos", String(indiceDocumento));
+                const pedidoSnapshot = await getDoc(pedidoRef); // Utiliza getDoc para obtener un documento individual
+                if (pedidoSnapshot.exists()) {
+                    const pedidoData = pedidoSnapshot.data();
+                    //console.log("flag 1",pedidoData.estado)
+                    // Verificar que el número de idsSubpedidos sea igual al número de subpedidos en el doc
+                    console.log(`flag 2: idsSubpedidos - ${idsSubpedidos} - Object.keys(pedidoData.pedido).length - ${Object.keys(pedidoData.pedido).length}`);
+                    if (idsSubpedidos.length <= Object.keys(pedidoData.pedido).length && idsSubpedidos.length >= 0) {
+                        // if (status === 'devuelto'){
+                        //     for (const idSubpedido of idsSubpedidos) {
+                        //         console.log(!pedidoData.pedido[idSubpedido])
+                        //         pedidoData.pedido[idSubpedido].estado= true ;
+                        //         // if (!pedidoData.pedido[idSubpedido]) {
+                        //         //     pedidoData.pedido[idSubpedido] = { estado: false }; // Crear y poner en false si no existe
+                        //         // } else {
+                        //         //     pedidoData.pedido[idSubpedido].estado = !pedidoData.pedido[idSubpedido].estado;  // Cambiar estado
+                        //         // }
+                        //     }
+                        // }
+                        console.log(status !== 'devuelto')
+                        if (status !== 'devuelto'){
+                            console.log(pedidoData.pedido)
+                            pedidoData.pedido.map((pedido,id )=> {
+                                console.log(`${pedido} -> ${id}`)
+                                if (!selectedRows.includes(id)){
+                                    console.log(`Se debe actualizar: ${id}` )
+                                    pedido.estado = false
+                                }else{
+                                    console.log(`No se debe actualizar: ${id}` )
+                                }
+                            })
+                        }else{
+                            pedidoData.pedido.map((pedido,id )=> {
+                                console.log(`${pedido} -> ${id}`)
+                                if (selectedRows.includes(id)){
+                                    console.log(`Se debe actualizar en true: ${id}` )
+                                        pedidoData.pedido[id].estado = true;  // Cambiar estado
+                                }else{
+                                    pedidoData.pedido[id].estado = false;
+                                }
+                            })
+
+                        }
+
+                        await updateDoc(pedidoRef, pedidoData);
+                        console.log("Pedido actualizado exitosamente.");
+                    } else {
+                        console.log("La cantidad de subpedidos no coincide.");
+                    }
+                } else {
+                    console.log("Pedido no encontrado.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        
+
+
+    const [selectAll, setSelectAll] = useState(false);
+    const [selectedRows, setSelectedRows] = useState([]);
+
+    const handleSelectAll = (event) => {
+        const isChecked = event.target.checked;
+        // if (isChecked){
+        //     setStatus('devuelto')
+        // }
+        // if (!isChecked){
+        //     setStatus('realizado')
+        // }
+        setSelectAll(isChecked);
+
+        const updatedSelectedRows = isChecked ? dataDelate[Object.keys(dataDelate)]['pedido'].map((fila, item) => item) : [];
+        setSelectedRows(updatedSelectedRows);
+    };
+
+        const handleCheckboxChange = (event, item, estado) => {
+        const isChecked = event.target.checked;
+        const updatedSelectedRows = [...selectedRows];
+        console.log("al iniciar: ",selectedRows.length)
+            if (isChecked) {
+                updatedSelectedRows.push(item);
+                setSelectedRows(updatedSelectedRows);
+                setStatus('devuelto')
+            } else {
+                const index = updatedSelectedRows.indexOf(item);
+                if (index !== -1) {
+                    updatedSelectedRows.splice(index, 1);
+                    setSelectedRows(updatedSelectedRows);
+                }
+            }
+
+            
+            if (selectedRows.length === 1) {
+                setStatus('realizado')
+            }
+            // if (status == 'devuelto' && selectedRows.length === 0) {
+            //     setStatus('realizado')
+            // }
+            console.log("al terminar: ",selectedRows.length)
+    };
+
+    async function cargar(fila, valor) {
+        console.log(fila," -> ",valor)
+        if (valor) {
+            await setSelectedRows(prevSelectedRows => [...prevSelectedRows, fila]);
+        }
+    }
+
+
     return (
         <>
-
             <div id="Spinner" className="Loader">
                 <div class="spinner">
                     <div></div>
@@ -384,7 +755,8 @@ function Pedidos(props) {
 
                             <tr id="subHeader" >
                                 <th colSpan={5}>Datos de la Tarima</th>
-                                <th colSpan={8} >Datos del Pedido</th>
+                                <th colSpan={5} >Datos del Pedido</th>
+                                <th colSpan={3} >Estado</th>
                             </tr>
                             <tr id="subHeader">
 
@@ -400,7 +772,7 @@ function Pedidos(props) {
                                 <th>Piezas x Pedir</th>
                                 <th>Proveedor</th>
 
-
+                                <th>Devolver</th>
                             </tr>
                         </thead>
 
@@ -448,8 +820,8 @@ function Pedidos(props) {
             </Modal>
 
             <Modal id='main-modal' show={showDelate} onHide={handleCloseDelate}>
-                <Modal.Header className="TituloEliminar" closeButton>
-                    <Modal.Title>Eliminar Pedido</Modal.Title>
+                <Modal.Header className="TituloEditar" closeButton>
+                    <Modal.Title>Editar Pedido</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="bodymodla" >
                     Datos de pedido
@@ -483,6 +855,10 @@ function Pedidos(props) {
                             <tr id="subHeader" >
                                 <th colSpan={5}>Datos de la Tarima</th>
                                 <th colSpan={8} >Datos del Pedido</th>
+                                {/* <th style={{ textAlign: 'center' }}>
+                                    <label>Estado</label>
+                                    <label >{`${dataDelate[Object.keys(dataDelate)] && dataDelate[Object.keys(dataDelate)]['estado'] !== undefined ? dataDelate[Object.keys(dataDelate)]['estado'] : status}`}</label>
+                                </th> */}
                             </tr>
                             <tr id="subHeader">
 
@@ -497,15 +873,14 @@ function Pedidos(props) {
                                 <th>Stock Piezas</th>
                                 <th>Piezas x Pedir</th>
                                 <th>Proveedor</th>
-
-
+                                <th>Devolver</th>
                             </tr>
                         </thead>
 
                         <tbody className="bodyTable">
                             {
                                 dataDelate[Object.keys(dataDelate)] != undefined ?
-                                    dataDelate[Object.keys(dataDelate)]['pedido'].map(fila =>
+                                    dataDelate[Object.keys(dataDelate)]['pedido'].map((fila, item) =>
                                         <tr>
                                             <th>{fila['Tarima']}</th>
                                             <th>{fila['Material']}</th>
@@ -518,19 +893,32 @@ function Pedidos(props) {
                                             <th>{fila['StockPiezas']}</th>
                                             <th style={fila['Piezas a pedir'] != 0 ? { color: 'red' } : { color: 'black' }} >{fila['Piezas a pedir']}</th>
                                             <th>{fila['Proveedor']}</th>
+                                            {/* <th>{String(fila['estado'])}</th> */}
+                                            {/* {cargar(item, fila['estado'])} */}
+                                            <input
+                                                type="checkbox"
+                                                onChange={(event) => handleCheckboxChange(event, item, fila['estado'])}
+                                                checked={selectedRows.includes(item)}
+                                            />
                                         </tr>
                                     ) :
                                     ''
 
                             }
-
                             <tr >
                                 <th colSpan={2}  >Costo de Stock</th>
                                 <th colSpan={1} style={{ color: 'green' }}>${costoStock}</th>
                                 <th colSpan={2} >Costo de materiales a comprar</th>
                                 <th colSpan={2} style={{ color: 'green' }}>${costoMaterial}</th>
                                 <th colSpan={2} >Total de Costo</th>
-                                <th colSpan={2} style={{ color: 'green' }}>${TotalCosto}</th>
+                                <th colSpan={3} style={{ color: 'green' }}>${TotalCosto}</th>
+                                {/* <th colSpan={2}>Seleccionar Todo
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAll}
+                                        checked={selectAll}
+                                    />
+                                </th> */}
                             </tr>
 
                         </tbody>
@@ -538,17 +926,31 @@ function Pedidos(props) {
                     </Table>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseDelate}>
-                        Cancelar
+                    <label htmlFor="statusSelect">Estado:</label>
+                    <select id="statusSelect" value={status} onChange={handleStatusChange}>
+                        <option value="realizado">Realizado</option>
+                        <option value="proceso">En Proceso</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="devuelto">Devuelto</option>
+                    </select>
+                    {/* <Button variant="secondary" onClick={() => handleCloseDelate(`${Object.keys(dataDelate)}` !== undefined ? `${Object.keys(dataDelate)}` : 'pendiente')}  ></Button> */}
+                    <Button variant="danger" onClick={() => test(Object.keys(dataDelate))}  >
+                        Test
                     </Button>
-                    <Button variant="primary" onClick={() => EliminarPedido(`${Object.keys(dataDelate)}`)}  >
+                    <Button variant="danger" onClick={() => EliminarPedido(`${Object.keys(dataDelate)}`)}  >
                         Eliminar
+                    </Button>
+                    <Button variant="primary" onClick={() => handleCloseGuardar(`${Object.keys(dataDelate)}`)}  >
+                        Guardar
+                    </Button>
+                    <Button variant="secondary" onClick={() => handleCloseDelate(`${Object.keys(dataDelate)}`)}  >
+                        Cancelar
                     </Button>
                 </Modal.Footer>
             </Modal>
 
             <Modal id='main-modal' show={showEdit} onHide={handleEditClose}>
-            <Modal.Header className="TituloProductosNuevos" closeButton>
+                <Modal.Header className="TituloProductosNuevos" closeButton>
                     <Modal.Title>Editar Pedido</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="bodymodla" >
@@ -608,7 +1010,6 @@ function Pedidos(props) {
                                 <th>Piezas x Pedir</th>
                                 <th>Proveedor</th>
 
-
                             </tr>
                         </thead>
 
@@ -627,6 +1028,7 @@ function Pedidos(props) {
                                         <th style={fila['StockPiezas'] < 5 ? { color: 'red' } : { color: 'black' }} >{fila['StockPiezas']}</th>
                                         <th style={fila['Piezas a pedir'] > 0 ? { color: 'red' } : { color: 'black' }} >{fila['Piezas a pedir']}</th>
                                         <th>{fila['Proveedor']}</th>
+                                        <th>new</th>
                                     </tr>
                                 )
                             }
@@ -674,6 +1076,8 @@ function Pedidos(props) {
                                 <tr id="topOfDataPedido">
                                     <th>Num.</th>
                                     <th style={{ opacity: .8, textAlign: 'center' }}>{Object.keys(fila)[0]}</th>
+                                    {/* <th>Estado</th>
+                                    <th style={{ opacity: .8, textAlign: 'center' }}>{fila[Object.keys(fila)[0]]['estado']}</th> */}
                                     <th>Cliente:</th>
                                     <th style={{ opacity: .8, textAlign: 'center' }} colSpan={2}>{fila[Object.keys(fila)[0]]['cliente']}</th>
                                     <th colSpan={1} >Demanda:</th>
@@ -682,8 +1086,8 @@ function Pedidos(props) {
                                     <th colSpan={2} style={{ opacity: .8, textAlign: 'center', color: '#1F618D' }}>{fila[Object.keys(fila)[0]]['SumaPies']}ft³</th>
                                     <th colSpan={1}>
                                         <div className="accionAtomar" >
-                                            <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button>
-                                            <button id="cancelarButton" onClick={() => handleShowDelate(fila)} >X</button>
+                                            {/* <button id="editarButton" className="material-symbols-outlined" ><span > edit </span></button> */}
+                                            <button id="editarButton" className="material-symbols-outlined" onClick={() => handleShowDelate(fila)} ><span > edit </span></button>
                                         </div>
                                     </th>
                                 </tr>
@@ -739,6 +1143,64 @@ function Pedidos(props) {
 
                     )
                 }
+            </div>
+
+            <div className="row justify-content-center">
+                <button className="btn btn-primary col-2" onClick={generatePDF}>
+                    Generar PDF
+                </button>
+            </div>
+            <br />
+            <div id="pdf-container">
+                <h3>Reporte de Material Necesario</h3>
+                <table className="numpedi table table-bordered border border-secondary" style={{ width: '100%', tableLayout: 'fixed' }}>
+                    <thead className="headersTAble">
+                        <tr id="subHeader">
+                            <th>Material</th>
+                            <th>Dimension</th>
+                            <th>Proveedor</th>
+                            <th col={1}>Cantidad De Tarimas</th>
+                            <th col={1}>Cantidad Por Material</th>
+                            <th>Precio Unitario</th>
+                            <th>Total De Piezas</th>
+                            <th>Piezas en Stock</th>
+                            <th style={{ color: 'black', fontWeight: 'bold' }}>Total De Inversion</th>
+                            <th style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Stock</th>
+                            <th style={{ color: 'black', fontWeight: 'bold' }}>Piezas a pedir</th>
+                            <th style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Piezas a Pedir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pedidos.map((documento, index) => {
+                            const pedido = Object.values(documento)[0].pedido;
+                            return pedido.map((subpedido, subIndex) => {
+                                if (subpedido['Piezas a pedir'] > 0) {
+                                    // Calcula la inversión de las piezas a pedir
+                                    const inversionPiezasPedir = subpedido['Piezas a pedir'] * subpedido.Precio;
+
+                                    return (
+                                        <tr key={`documento-${index}-subpedido-${subIndex}`}>
+                                            <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Material}</td>
+                                            <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Dimension}</td>
+                                            <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Proveedor}</td>
+                                            <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadDeTarimas}</td>
+                                            <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadPorMaterial}</td>
+                                            <td style={{ color: 'green', fontWeight: 'bold' }}>{subpedido.Precio}</td>
+                                            <td style={{ color: 'blue', fontWeight: 'bold' }}>{subpedido.TotalPiezas}</td>
+                                            <td style={{ color: 'orange', fontWeight: 'bold' }}>{subpedido.StockPiezas}</td>
+                                            <td style={{ color: 'blue', fontWeight: 'bold' }}>{subpedido.TotalDeInversion}</td>
+                                            <td style={{ color: 'orange', fontWeight: 'bold' }}>{subpedido.InversionDeStock}</td>
+                                            <td style={{ color: 'aqua', fontWeight: 'bold' }}>{subpedido['Piezas a pedir']}</td>
+                                            <td style={{ color: 'aqua', fontWeight: 'bold' }}>{inversionPiezasPedir}</td>
+                                        </tr>
+                                    );
+                                }
+                                return null;
+                            });
+                        })}
+                    </tbody>
+                </table>
+
             </div>
 
         </>

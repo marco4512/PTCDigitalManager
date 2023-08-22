@@ -481,6 +481,13 @@
   font-weight: bolder;
 }
 
+.TituloEditar {
+  background-color: #4cc652;
+  text-align: center;
+  color: white;
+  font-weight: bolder;
+}
+
 .tablaAgregarProductos {
   width: 100%;
   display: flex;
@@ -790,12 +797,43 @@ input:hover {
 }
 
 .panel-lg {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   background-color: darkslateblue;
   color: whitesmoke;
   border: #000000;
-  height: 70vh;
+  height: 100%;
 }
 
+.content-panel-lg-money {
+  background-color: transparent;
+  overflow-x: scroll; /* Agrega una barra horizontal siempre visible */
+      white-space: nowrap; /* Evita que el contenido se envuelva a otra línea */
+}
+
+.content-panel-lg-money > p {
+  font-size: 8rem;
+  padding-top: 1rem;
+  padding-bottom: 5rem;
+}
+
+.content-panel-lg {
+  font-size: 35vh;
+}
+.content-panel-sm {
+  font-size: 10vh;
+  margin-top: 0px;
+}
+.vertical-center {
+  display: flex;
+  align-items: center;
+  height: 90%; /* Ajusta la altura según tus necesidades */
+  background-color:transparent; /* Ajusta el color de fondo según tus necesidades */
+}
+.horizontal-center {
+  display: flex;
+  justify-content: center;
+}
 
 #mi-col {
   display: flex;

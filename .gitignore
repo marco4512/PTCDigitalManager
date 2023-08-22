@@ -24,3 +24,6 @@ yarn-error.log*
 /.history/
 node_modules
 ptc_web/src/Firebase/firebase.js
+package-lock.json
+package.json
+node_modules/.package-lock.json
