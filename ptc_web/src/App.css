@@ -932,3 +932,8 @@ input:hover {
   text-align: center;
   align-items: center;
 }
+
+.pagebreak {
+  page-break-before: always; /* Agrega un salto de página antes del div */
+  border-top: 30px solid transparent; /* Agrega un borde superior */
+}

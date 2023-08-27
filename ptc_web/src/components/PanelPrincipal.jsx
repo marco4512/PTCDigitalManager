@@ -159,9 +159,15 @@ console.log("Total de costoStock de pedidos en estado 'realizado':", totalCostoS
                 margin: 10,
                 filename: now + ' PTC-report.pdf', // Nombre del archivo PDF
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            };
+                html2canvas: { scale: 3, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }, // Tipo carta y orientación vertical
+                header: {
+                    height: '10mm', // Altura del encabezado
+                    contents: `<h1 style="text-align: center;">Hola Mundo</h1>`}
+              };
+              
+              
+              
 
             html2pdf().from(element).set(opt).save();
         };
@@ -243,7 +249,7 @@ console.log("Total de costoStock de pedidos en estado 'realizado':", totalCostoS
                             </div>
                         </div>
                     </div>
-
+                    <div class="pagebreak"></div>
                     <div className="row pb-5 px-5">
                         <div id="mi-col" className="col-5">
                             <div class="child bg-dark text-center text-center">En Stock
@@ -261,6 +267,7 @@ console.log("Total de costoStock de pedidos en estado 'realizado':", totalCostoS
                         </div>
                     </div>
 
+                    <div class="pagebreak"></div>
                     <div className="row h-70 pb-5 px-5">
                         <div className="panel-lg col-5 bg-dark mx-4 text-center">Ventas
                             <div className="content-panel-lg-money"><p>${ventas}</p></div>
