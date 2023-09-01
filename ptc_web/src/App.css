@@ -91,6 +91,7 @@
 
 .home {
   color: red;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* X-offset, Y-offset, Blur, Color */
 }
 
 .TablaCont {
@@ -936,4 +937,40 @@ input:hover {
 .pagebreak {
   page-break-before: always; /* Agrega un salto de página antes del div */
   border-top: 30px solid transparent; /* Agrega un borde superior */
+}
+
+.fila-gris {
+  background-color: darkgrey; /* Gris */
+}
+
+.fila-verde {
+  background-color: #b3ffb3; /* Verde */
+}
+
+.fila-roja {
+  background-color: #ffb3b3; /* Rojo */
+}
+.newTable{
+  text-align:center;
+  margin: 0 auto;
+  padding: 5px;
+  font-size: 14px;
+}
+.tableyle{
+  border: .5  solid black;
+}
+.header{
+  width: 90vw;
+  margin: 0 auto;
+}
+
+.logo-pdf{
+  height: 100px;
+  width: auto;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

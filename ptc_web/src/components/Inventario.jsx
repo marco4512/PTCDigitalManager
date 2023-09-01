@@ -15,6 +15,7 @@ function Inventario(props) {
     const [Precio, setPrecio] = useState();
     const [Fecha_ent, setFecha_ent] = useState();
     const [Proveedor, setProveedor] = useState();
+    const [Min, setMin] = useState();
     const [arregloPro, setArregloPro] = useState([]);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -68,6 +69,9 @@ function Inventario(props) {
                 break
             case 'Proveedor':
                 setProveedor(event.target.value);
+                break
+            case 'Min':
+                setMin(event.target.value);
                 break
             default:
                 break;
@@ -176,10 +180,11 @@ function Inventario(props) {
             setPrecio(data['Precio'])
             setFecha_ent(data['FechaEntrada'])
             setProveedor(data['Proveedor'])
+            setMin(data['Min'])
             handleShow2()
 
         } else {
-            if (data['Volumen'] == volTemp && data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor) {
+            if (data['Volumen'] == volTemp && data['Existencia'] == Existencia && data['Precio'] == Precio && data['FechaEntrada'] == Fecha_ent && data['Proveedor'] == Proveedor && data['Min'] == Min) {
                 //console.log('No se edito nada')
                 handleClose2()
             } else {
@@ -193,6 +198,7 @@ function Inventario(props) {
                     Precio: Precio != '' ? Precio : '0.0',
                     FechaEntrada: Fecha_ent,
                     Proveedor: Proveedor,
+                    Min: Min != '' ? Min : '0',
                     EspacioEnAlmacen: (espAlm != '' ? espAlm : '0'),
                     ValorInventario: (valorInv != '' ? valorInv : '0')
                 }
@@ -284,6 +290,7 @@ function Inventario(props) {
                                 <th>Precio</th>
                                 <th>Fecha ent</th>
                                 <th>Proveedor</th>
+                                <th>Cantidad Minima</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -300,6 +307,7 @@ function Inventario(props) {
                                             )}
                                         </select>
                                     </td>
+                                    <td key={5} ><input className="inputEditar" required type="text" onChange={onChangeEditar} name='Min' /></td>
                                 </tr>
                             }
                         </tbody>
@@ -391,6 +399,7 @@ function Inventario(props) {
                                 <th>Fecha ent</th>
                                 <th>Fecha sal</th>
                                 <th>Proveedor</th>
+                                <th>Cantidad Minima</th>
                                 <th>Agregar</th>
                             </tr>
                         </thead>
@@ -408,6 +417,8 @@ function Inventario(props) {
                                         <td key={`8.${indice}`} >{number['data']['FechaEntrada']}</td>
                                         <td key={`9.${indice}`} >{number['data']['FechaSalida']}</td>
                                         <td key={`10.${indice}`} >{number['data']['Proveedor']}</td>
+                                        <td key={`11.${indice}`} >{number['data']['Min']}</td>
+
                                         <div className="accionAtomar">
                                             <button id="editarButton2" className="material-symbols-outlined" ><span > add_box </span></button>
                                             <button id="editarButton" className="material-symbols-outlined" onClick={() => { editarProductoMejorado(number['data'], true, number['id'], number['Volumen']) }}><span > edit </span></button>

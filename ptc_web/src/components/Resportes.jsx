@@ -149,9 +149,8 @@ function Reportes(props) {
             <Nav state={'SingOut'} />
             <SubMenu Rol={rol} />
             <div>
-            <Card.Img variant="top" src="/public/PTC.jpeg" />
             <h1 className="home">Reportes</h1>
-            <p>{JSON.stringify(existencias)}</p>
+            {/* <p>{JSON.stringify(existencias)}</p> */}
             <h2>Inventario</h2>
             <table className="numpedi table table-bordered border border-secondary" style={{ width: '100%', tableLayout: 'fixed' }}>
                 <thead className="headersTAble">
@@ -191,8 +190,8 @@ function Reportes(props) {
                 </tbody>
             </table>
             <h1>Total inventario: {valorTotalInventario ? valorTotalInventario : "Calculando..."}</h1>
-            <h2>Pedidos</h2>
-            <p>{JSON.stringify(pedidos)}</p>
+            {/* <h2>Pedidos</h2>
+            <p>{JSON.stringify(pedidos)}</p> */}
             <table className="numpedi table table-bordered border border-secondary" style={{ width: '100%', tableLayout: 'fixed' }}>
       <thead className="headersTAble">
         <tr id="subHeader">

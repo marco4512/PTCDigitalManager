@@ -9,6 +9,7 @@ import Nav from "./Nav.jsx";
 import SubMenu from './SubMenu.jsx';
 import { Toaster, toast } from 'sonner';
 import html2pdf from 'html2pdf.js';
+import PTCImage from '../asserts/images/PTC.jpg';
 
 function Pedidos(props) {
     const navigate = useNavigate();
@@ -18,22 +19,28 @@ function Pedidos(props) {
     const handleShow = () => setShow(true);
     const [dataDelate, setDataDelate] = useState(false);
     const [rol, setRol] = useState('');
+    const [today, setToday] = useState(new Date);
 
     const [showDelate, setShowDelate] = useState(false);
+    let countRow =0;
 
-    function handleShowDelate(allData) {
+    async function handleShowDelate(allData) {
         let id = Object.keys(allData)[0]
         setStatus(allData[id]["estado"] = allData[id]["estado"] === undefined ? "pendiente" : allData[id]["estado"]);
         console.log("El valor es:   ", allData[id]);
-       
+
         let data = allData[id].pedido
         let pedidos = Object.keys(data)
 
         console.log(data)
-        data.map((fila,item) => {
-            cargar(item, fila['estado'])
-        })
-        console.log(selectedRows)
+        const updatedSelectedRows = [];
+        for (let item = 0; item < data.length; item++) {
+            await cargar(item, data[item]['estado']);
+            updatedSelectedRows.push(item);
+        }
+
+        console.log(updatedSelectedRows);
+        console.log(selectedRows);
 
         setShowDelate(true);
         setDataDelate(allData);
@@ -54,10 +61,10 @@ function Pedidos(props) {
             await updateDoc(documentoRef, {
                 estado: status
             });
-            
+
             //pendiente
             actualizarPedido(indiceDocumento)
-            console.log('Documento creado o actualizado con éxito.',status);
+            console.log('Documento creado o actualizado con éxito.', status);
         } catch {
             console.log("Error");
         }
@@ -363,25 +370,12 @@ function Pedidos(props) {
 
     //Estado de pedido
     const [status, setStatus] = useState('pendiente');
-    const  handleStatusChange = (event) => {
+    const handleStatusChange = (event) => {
         setStatus(event.target.value)
+
+
     };
     useEffect(() => {
-        console.log(status); // Esto se ejecutará cada vez que el estado 'status' cambie
-        if (status == 'devuelto' && selectedRows.length === 0){
-            handleSelectAll({ target: { checked: true } })
-            console.log("selectedRow",selectedRows.length)
-            // setStatus('realizado')
-        }else{
-            // if(selectedRows.length !== 0)setStatus('devuelto')
-        }
-        if (status != 'devuelto'){
-            handleSelectAll({ target: { checked: false } })
-        }
-
-        if (selectedRows.length === 1) {
-            setStatus('realizado')
-        }
 
 
         // if (status == 'devuelto' && selectedRows.length !== 0) {
@@ -392,14 +386,16 @@ function Pedidos(props) {
         // }
 
 
-        // if (status == 'devuelto' && selectedRows.length === 0){
-        //     handleSelectAll({ target: { checked: true } })
-        // }else{
-           
-        //         handleSelectAll({ target: { checked: false } })
-        // }
-        
-    }, [status]); 
+        if (status !== 'devuelto' && selectedRows.length !== 0) {
+            handleSelectAll({ target: { checked: false } })
+        }
+
+        if (status == 'devuelto' && selectedRows.length == 0) {
+            handleSelectAll({ target: { checked: true } })
+            // alert("holis")
+        }
+
+    }, [status]);
 
     const generatePDF = () => {
         const fechaHoraActual = new Date();
@@ -413,6 +409,10 @@ function Pedidos(props) {
             image: { type: 'png', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            header: {
+                height: '10mm', // Altura del encabezado
+                contents: "<h1 style='text-align: center;'>Hola Mundo</h1>"
+            }
         };
 
         const element = document.getElementById('pdf-container');
@@ -444,122 +444,122 @@ function Pedidos(props) {
     const handleSelectRow = (row) => {
     };
 
-    async function test(indiceDocumento) {
-        // console.log("Filas seleccionadas: ",selectedRows)
-        // actualizarPedido(indiceDocumento)
+    // async function test(indiceDocumento) {
+    //     // console.log("Filas seleccionadas: ",selectedRows)
+    //     // actualizarPedido(indiceDocumento)
 
-        const pedidoData = {
-            "Demanda": "33",
-            "SumaPies": "1468.02",
-            "Tarima": "46 x 63 T",
-            "TotalCosto": "43147.50",
-            "cliente": "JAYCOM",
-            "costoMaterial": "32140.00",
-            "costoStock": "11007.50",
-            "estado": "proceso",
-            "fecha": "17/7/2023",
-            "pedido": [
-                {
-                    "CantidadDeTarimas": "33",
-                    "CantidadPorMaterial": "11",
-                    "Cliente": "JAYCOM",
-                    "Dimension": "5/8 x 3 1/4 x 46",
-                    "InversionDeStock": "4000",
-                    "InversionPorMaterial": "14150",
-                    "Material": "TABLA ",
-                    "PieTabla": "0.6488",
-                    "Piezas a pedir": "283",
-                    "Precio": "50",
-                    "Proveedor": "TriPlaynet",
-                    "StockPiezas": "80",
-                    "Tarima": "46 x 63 T",
-                    "TotalDeInversion": "18150",
-                    "TotalPies": "235.5144",
-                    "TotalPiezas": "363"
-                },
-                {
-                    "CantidadDeTarimas": "33",
-                    "CantidadPorMaterial": "8",
-                    "Cliente": "JAYCOM",
-                    "Dimension": "5/8 x 3 1/4 x 63 ",
-                    "InversionDeStock": "3200",
-                    "InversionPorMaterial": "7360",
-                    "Material": "TABLA",
-                    "PieTabla": "0.8886",
-                    "Piezas a pedir": "184",
-                    "Precio": "40",
-                    "Proveedor": "TresMaderas",
-                    "StockPiezas": "80",
-                    "Tarima": "46 x 63 T",
-                    "TotalDeInversion": "10560",
-                    "TotalPies": "234.5904",
-                    "TotalPiezas": "264"
-                },
-                {
-                    "CantidadDeTarimas": "33",
-                    "CantidadPorMaterial": "10",
-                    "Cliente": "JAYCOM",
-                    "Dimension": "5/8 x 3 1/4 x 57",
-                    "InversionDeStock": "1435",
-                    "InversionPorMaterial": "5330",
-                    "Material": "TABLA ",
-                    "PieTabla": "0.804",
-                    "Piezas a pedir": "260",
-                    "Precio": "20.5",
-                    "Proveedor": "TresMaderas",
-                    "StockPiezas": "70",
-                    "Tarima": "46 x 63 T",
-                    "TotalDeInversion": "6765",
-                    "TotalPies": "265.32",
-                    "TotalPiezas": "330"
-                },
-                {
-                    "CantidadDeTarimas": "33",
-                    "CantidadPorMaterial": "9",
-                    "Cliente": "JAYCOM",
-                    "Dimension": "3 x 3 x 5",
-                    "InversionDeStock": "640",
-                    "InversionPorMaterial": "5300",
-                    "Material": "TACON",
-                    "PieTabla": "1.3",
-                    "Piezas a pedir": "265",
-                    "Precio": "20",
-                    "Proveedor": "WoodenUno",
-                    "StockPiezas": "32",
-                    "Tarima": "46 x 63 T",
-                    "TotalDeInversion": "5940",
-                    "TotalPies": "386.1",
-                    "TotalPiezas": "297"
-                },
-                {
-                    "CantidadDeTarimas": "33",
-                    "CantidadPorMaterial": "105",
-                    "Cliente": "JAYCOM",
-                    "Dimension": "2\" CAL 92\"",
-                    "InversionDeStock": "1732.5",
-                    "InversionPorMaterial": "0",
-                    "Material": "CLAVO",
-                    "PieTabla": "0.1",
-                    "Piezas a pedir": "0",
-                    "Precio": "0.5",
-                    "Proveedor": "TresMaderas",
-                    "StockPiezas": "8000",
-                    "Tarima": "46 x 63 T",
-                    "TotalDeInversion": "1732.5",
-                    "TotalPies": "346.5",
-                    "TotalPiezas": "3465"
-                }
-            ]
-        };        
-    
-        try {
-            const pedidoRef = doc(db, "Pedidos", "2"); // Referencia al documento con ID 2
-            await setDoc(pedidoRef, pedidoData); // Agregar el documento con los datos
-            console.log("Pedido agregado exitosamente a Firebase.");
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    }
+    //     const pedidoData = {
+    //         "Demanda": "33",
+    //         "SumaPies": "1468.02",
+    //         "Tarima": "46 x 63 T",
+    //         "TotalCosto": "43147.50",
+    //         "cliente": "JAYCOM",
+    //         "costoMaterial": "32140.00",
+    //         "costoStock": "11007.50",
+    //         "estado": "proceso",
+    //         "fecha": "17/7/2023",
+    //         "pedido": [
+    //             {
+    //                 "CantidadDeTarimas": "33",
+    //                 "CantidadPorMaterial": "11",
+    //                 "Cliente": "JAYCOM",
+    //                 "Dimension": "5/8 x 3 1/4 x 46",
+    //                 "InversionDeStock": "4000",
+    //                 "InversionPorMaterial": "14150",
+    //                 "Material": "TABLA ",
+    //                 "PieTabla": "0.6488",
+    //                 "Piezas a pedir": "283",
+    //                 "Precio": "50",
+    //                 "Proveedor": "TriPlaynet",
+    //                 "StockPiezas": "80",
+    //                 "Tarima": "46 x 63 T",
+    //                 "TotalDeInversion": "18150",
+    //                 "TotalPies": "235.5144",
+    //                 "TotalPiezas": "363"
+    //             },
+    //             {
+    //                 "CantidadDeTarimas": "33",
+    //                 "CantidadPorMaterial": "8",
+    //                 "Cliente": "JAYCOM",
+    //                 "Dimension": "5/8 x 3 1/4 x 63 ",
+    //                 "InversionDeStock": "3200",
+    //                 "InversionPorMaterial": "7360",
+    //                 "Material": "TABLA",
+    //                 "PieTabla": "0.8886",
+    //                 "Piezas a pedir": "184",
+    //                 "Precio": "40",
+    //                 "Proveedor": "TresMaderas",
+    //                 "StockPiezas": "80",
+    //                 "Tarima": "46 x 63 T",
+    //                 "TotalDeInversion": "10560",
+    //                 "TotalPies": "234.5904",
+    //                 "TotalPiezas": "264"
+    //             },
+    //             {
+    //                 "CantidadDeTarimas": "33",
+    //                 "CantidadPorMaterial": "10",
+    //                 "Cliente": "JAYCOM",
+    //                 "Dimension": "5/8 x 3 1/4 x 57",
+    //                 "InversionDeStock": "1435",
+    //                 "InversionPorMaterial": "5330",
+    //                 "Material": "TABLA ",
+    //                 "PieTabla": "0.804",
+    //                 "Piezas a pedir": "260",
+    //                 "Precio": "20.5",
+    //                 "Proveedor": "TresMaderas",
+    //                 "StockPiezas": "70",
+    //                 "Tarima": "46 x 63 T",
+    //                 "TotalDeInversion": "6765",
+    //                 "TotalPies": "265.32",
+    //                 "TotalPiezas": "330"
+    //             },
+    //             {
+    //                 "CantidadDeTarimas": "33",
+    //                 "CantidadPorMaterial": "9",
+    //                 "Cliente": "JAYCOM",
+    //                 "Dimension": "3 x 3 x 5",
+    //                 "InversionDeStock": "640",
+    //                 "InversionPorMaterial": "5300",
+    //                 "Material": "TACON",
+    //                 "PieTabla": "1.3",
+    //                 "Piezas a pedir": "265",
+    //                 "Precio": "20",
+    //                 "Proveedor": "WoodenUno",
+    //                 "StockPiezas": "32",
+    //                 "Tarima": "46 x 63 T",
+    //                 "TotalDeInversion": "5940",
+    //                 "TotalPies": "386.1",
+    //                 "TotalPiezas": "297"
+    //             },
+    //             {
+    //                 "CantidadDeTarimas": "33",
+    //                 "CantidadPorMaterial": "105",
+    //                 "Cliente": "JAYCOM",
+    //                 "Dimension": "2\" CAL 92\"",
+    //                 "InversionDeStock": "1732.5",
+    //                 "InversionPorMaterial": "0",
+    //                 "Material": "CLAVO",
+    //                 "PieTabla": "0.1",
+    //                 "Piezas a pedir": "0",
+    //                 "Precio": "0.5",
+    //                 "Proveedor": "TresMaderas",
+    //                 "StockPiezas": "8000",
+    //                 "Tarima": "46 x 63 T",
+    //                 "TotalDeInversion": "1732.5",
+    //                 "TotalPies": "346.5",
+    //                 "TotalPiezas": "3465"
+    //             }
+    //         ]
+    //     };
+
+    //     try {
+    //         const pedidoRef = doc(db, "Pedidos", "2"); // Referencia al documento con ID 2
+    //         await setDoc(pedidoRef, pedidoData); // Agregar el documento con los datos
+    //         console.log("Pedido agregado exitosamente a Firebase.");
+    //     } catch (error) {
+    //         console.error("Error:", error);
+    //     }
+    // }
 
     // function handleCheckboxChange(event, fila, item) {
     //     const checkbox = event.target;
@@ -582,70 +582,71 @@ function Pedidos(props) {
 
 
     // async function actualizarPedido(idPedido, idsSubpedidos) {
-        async function actualizarPedido(indiceDocumento) {
-            const idsSubpedidos = selectedRows; // IDs de subpedidos a actualizar
-            try {
-                const pedidoRef = doc(db, "Pedidos", String(indiceDocumento));
-                const pedidoSnapshot = await getDoc(pedidoRef); // Utiliza getDoc para obtener un documento individual
-                if (pedidoSnapshot.exists()) {
-                    const pedidoData = pedidoSnapshot.data();
-                    //console.log("flag 1",pedidoData.estado)
-                    // Verificar que el número de idsSubpedidos sea igual al número de subpedidos en el doc
-                    console.log(`flag 2: idsSubpedidos - ${idsSubpedidos} - Object.keys(pedidoData.pedido).length - ${Object.keys(pedidoData.pedido).length}`);
-                    if (idsSubpedidos.length <= Object.keys(pedidoData.pedido).length && idsSubpedidos.length >= 0) {
-                        // if (status === 'devuelto'){
-                        //     for (const idSubpedido of idsSubpedidos) {
-                        //         console.log(!pedidoData.pedido[idSubpedido])
-                        //         pedidoData.pedido[idSubpedido].estado= true ;
-                        //         // if (!pedidoData.pedido[idSubpedido]) {
-                        //         //     pedidoData.pedido[idSubpedido] = { estado: false }; // Crear y poner en false si no existe
-                        //         // } else {
-                        //         //     pedidoData.pedido[idSubpedido].estado = !pedidoData.pedido[idSubpedido].estado;  // Cambiar estado
-                        //         // }
-                        //     }
-                        // }
-                        console.log(status !== 'devuelto')
-                        if (status !== 'devuelto'){
-                            console.log(pedidoData.pedido)
-                            pedidoData.pedido.map((pedido,id )=> {
-                                console.log(`${pedido} -> ${id}`)
-                                if (!selectedRows.includes(id)){
-                                    console.log(`Se debe actualizar: ${id}` )
-                                    pedido.estado = false
-                                }else{
-                                    console.log(`No se debe actualizar: ${id}` )
-                                }
-                            })
-                        }else{
-                            pedidoData.pedido.map((pedido,id )=> {
-                                console.log(`${pedido} -> ${id}`)
-                                if (selectedRows.includes(id)){
-                                    console.log(`Se debe actualizar en true: ${id}` )
-                                        pedidoData.pedido[id].estado = true;  // Cambiar estado
-                                }else{
-                                    pedidoData.pedido[id].estado = false;
-                                }
-                            })
-
-                        }
-
-                        await updateDoc(pedidoRef, pedidoData);
-                        console.log("Pedido actualizado exitosamente.");
+    async function actualizarPedido(indiceDocumento) {
+        const idsSubpedidos = selectedRows; // IDs de subpedidos a actualizar
+        try {
+            const pedidoRef = doc(db, "Pedidos", String(indiceDocumento));
+            const pedidoSnapshot = await getDoc(pedidoRef); // Utiliza getDoc para obtener un documento individual
+            if (pedidoSnapshot.exists()) {
+                const pedidoData = pedidoSnapshot.data();
+                //console.log("flag 1",pedidoData.estado)
+                // Verificar que el número de idsSubpedidos sea igual al número de subpedidos en el doc
+                console.log(`flag 2: idsSubpedidos - ${idsSubpedidos} - Object.keys(pedidoData.pedido).length - ${Object.keys(pedidoData.pedido).length}`);
+                if (idsSubpedidos.length <= Object.keys(pedidoData.pedido).length && idsSubpedidos.length >= 0) {
+                    // if (status === 'devuelto'){
+                    //     for (const idSubpedido of idsSubpedidos) {
+                    //         console.log(!pedidoData.pedido[idSubpedido])
+                    //         pedidoData.pedido[idSubpedido].estado= true ;
+                    //         // if (!pedidoData.pedido[idSubpedido]) {
+                    //         //     pedidoData.pedido[idSubpedido] = { estado: false }; // Crear y poner en false si no existe
+                    //         // } else {
+                    //         //     pedidoData.pedido[idSubpedido].estado = !pedidoData.pedido[idSubpedido].estado;  // Cambiar estado
+                    //         // }
+                    //     }
+                    // }
+                    console.log(status !== 'devuelto')
+                    if (status !== 'devuelto') {
+                        console.log(pedidoData.pedido)
+                        pedidoData.pedido.map((pedido, id) => {
+                            console.log(`${pedido} -> ${id}`)
+                            if (!selectedRows.includes(id)) {
+                                console.log(`Se debe actualizar: ${id}`)
+                                pedido.estado = false
+                            } else {
+                                console.log(`No se debe actualizar: ${id}`)
+                            }
+                        })
                     } else {
-                        console.log("La cantidad de subpedidos no coincide.");
+                        pedidoData.pedido.map((pedido, id) => {
+                            console.log(`${pedido} -> ${id}`)
+                            if (selectedRows.includes(id)) {
+                                console.log(`Se debe actualizar en true: ${id}`)
+                                pedidoData.pedido[id].estado = true;  // Cambiar estado
+                            } else {
+                                pedidoData.pedido[id].estado = false;
+                            }
+                        })
+
                     }
+
+                    await updateDoc(pedidoRef, pedidoData);
+                    console.log("Pedido actualizado exitosamente.");
                 } else {
-                    console.log("Pedido no encontrado.");
+                    console.log("La cantidad de subpedidos no coincide.");
                 }
-            } catch (error) {
-                console.error("Error:", error);
+            } else {
+                console.log("Pedido no encontrado.");
             }
+        } catch (error) {
+            console.error("Error:", error);
         }
-        
+    }
+
 
 
     const [selectAll, setSelectAll] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
+    const [updateSelectedRows, setUpdateSelectedRows] = useState([]);
 
     const handleSelectAll = (event) => {
         const isChecked = event.target.checked;
@@ -661,36 +662,35 @@ function Pedidos(props) {
         setSelectedRows(updatedSelectedRows);
     };
 
-        const handleCheckboxChange = (event, item, estado) => {
+    const handleCheckboxChange = (event, item) => {
         const isChecked = event.target.checked;
         const updatedSelectedRows = [...selectedRows];
-        console.log("al iniciar: ",selectedRows.length)
-            if (isChecked) {
-                updatedSelectedRows.push(item);
+        console.log("al iniciar: ", selectedRows.length)
+        if (isChecked) {
+            updatedSelectedRows.push(item);
+            setSelectedRows(updatedSelectedRows);
+            setStatus('devuelto')
+        } else {
+            const index = updatedSelectedRows.indexOf(item);
+            if (index !== -1) {
+                updatedSelectedRows.splice(index, 1);
                 setSelectedRows(updatedSelectedRows);
-                setStatus('devuelto')
-            } else {
-                const index = updatedSelectedRows.indexOf(item);
-                if (index !== -1) {
-                    updatedSelectedRows.splice(index, 1);
-                    setSelectedRows(updatedSelectedRows);
-                }
             }
+        }
 
-            
-            if (selectedRows.length === 1) {
-                setStatus('realizado')
-            }
-            // if (status == 'devuelto' && selectedRows.length === 0) {
-            //     setStatus('realizado')
-            // }
-            console.log("al terminar: ",selectedRows.length)
+
+        // if (status == 'devuelto' && selectedRows.length === 0) {
+        //     setStatus('realizado')
+        // }
+        console.log("al terminar: ", selectedRows.length)
     };
 
     async function cargar(fila, valor) {
-        console.log(fila," -> ",valor)
+        console.log(fila, " -> ", valor)
         if (valor) {
             await setSelectedRows(prevSelectedRows => [...prevSelectedRows, fila]);
+        } else {
+            console.log("No se actualizo: ", valor);
         }
     }
 
@@ -934,9 +934,9 @@ function Pedidos(props) {
                         <option value="devuelto">Devuelto</option>
                     </select>
                     {/* <Button variant="secondary" onClick={() => handleCloseDelate(`${Object.keys(dataDelate)}` !== undefined ? `${Object.keys(dataDelate)}` : 'pendiente')}  ></Button> */}
-                    <Button variant="danger" onClick={() => test(Object.keys(dataDelate))}  >
+                    {/* <Button variant="danger" onClick={() => test(Object.keys(dataDelate))}  >
                         Test
-                    </Button>
+                    </Button> */}
                     <Button variant="danger" onClick={() => EliminarPedido(`${Object.keys(dataDelate)}`)}  >
                         Eliminar
                     </Button>
@@ -1151,54 +1151,130 @@ function Pedidos(props) {
                 </button>
             </div>
             <br />
-            <div id="pdf-container">
                 <h3>Reporte de Material Necesario</h3>
-                <table className="numpedi table table-bordered border border-secondary" style={{ width: '100%', tableLayout: 'fixed' }}>
-                    <thead className="headersTAble">
+            <div id="pdf-container" className="center" >
+                <table striped className="table-bordered">
+                    <thead className="header">
+                        <tr colSpan={12}>
+                            <th colSpan={1}>
+                                <img src={PTCImage} className="logo-pdf" alt="PTC" />
+                            </th>
+                            <th colSpan={7}>
+
+                            </th>
+                            <th colSpan={4}>
+                                <h6 className="center">Fecha: {today.toLocaleString()}</h6>
+                            </th>
+                        </tr>
                         <tr id="subHeader">
-                            <th>Material</th>
-                            <th>Dimension</th>
-                            <th>Proveedor</th>
-                            <th col={1}>Cantidad De Tarimas</th>
-                            <th col={1}>Cantidad Por Material</th>
-                            <th>Precio Unitario</th>
-                            <th>Total De Piezas</th>
-                            <th>Piezas en Stock</th>
-                            <th style={{ color: 'black', fontWeight: 'bold' }}>Total De Inversion</th>
-                            <th style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Stock</th>
-                            <th style={{ color: 'black', fontWeight: 'bold' }}>Piezas a pedir</th>
-                            <th style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Piezas a Pedir</th>
+                            <th className="newTable">Material</th>
+                            <th className="newTable">Dimension</th>
+                            <th className="newTable" col={3}>Proveedor</th>
+                            <th className="newTable" col={1}>Cantidad De Tarimas</th>
+                            <th className="newTable" col={1}>Cantidad Por Material</th>
+                            <th className="newTable">Precio Unitario</th>
+                            <th className="newTable">Total De Piezas</th>
+                            <th className="newTable">Piezas en Stock</th>
+                            <th className="newTable" style={{ color: 'black', fontWeight: 'bold' }}>Total De Inversion</th>
+                            <th className="newTable" style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Stock</th>
+                            <th className="newTable" style={{ color: 'black', fontWeight: 'bold' }}>Piezas a pedir</th>
+                            <th className="newTable" style={{ color: 'black', fontWeight: 'bold' }}>Inversion De Piezas a Pedir</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {pedidos.map((documento, index) => {
+                    {/* <tbody>
+                       {pedidos.map((documento, index) => {
                             const pedido = Object.values(documento)[0].pedido;
-                            return pedido.map((subpedido, subIndex) => {
+                            const rows = pedido.map((subpedido, subIndex) => {
                                 if (subpedido['Piezas a pedir'] > 0) {
-                                    // Calcula la inversión de las piezas a pedir
                                     const inversionPiezasPedir = subpedido['Piezas a pedir'] * subpedido.Precio;
-
                                     return (
-                                        <tr key={`documento-${index}-subpedido-${subIndex}`}>
+                                        <>
+                                        {
+                                       countRow++
+                                        }
+                                            <tr key={`documento-${index}-subpedido-${subIndex}`}>
                                             <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Material}</td>
                                             <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Dimension}</td>
                                             <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Proveedor}</td>
                                             <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadDeTarimas}</td>
                                             <td style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadPorMaterial}</td>
                                             <td style={{ color: 'green', fontWeight: 'bold' }}>{subpedido.Precio}</td>
-                                            <td style={{ color: 'blue', fontWeight: 'bold' }}>{subpedido.TotalPiezas}</td>
-                                            <td style={{ color: 'orange', fontWeight: 'bold' }}>{subpedido.StockPiezas}</td>
-                                            <td style={{ color: 'blue', fontWeight: 'bold' }}>{subpedido.TotalDeInversion}</td>
-                                            <td style={{ color: 'orange', fontWeight: 'bold' }}>{subpedido.InversionDeStock}</td>
-                                            <td style={{ color: 'aqua', fontWeight: 'bold' }}>{subpedido['Piezas a pedir']}</td>
-                                            <td style={{ color: 'aqua', fontWeight: 'bold' }}>{inversionPiezasPedir}</td>
+                                            <td style={{ color: 'CornflowerBlue', fontWeight: 'bold' }}>{subpedido.TotalPiezas}</td>
+                                            <td style={{ color: 'Goldenrod', fontWeight: 'bold' }}>{subpedido.StockPiezas}</td>
+                                            <td style={{ color: 'CornflowerBlue', fontWeight: 'bold' }}>{subpedido.TotalDeInversion}</td>
+                                            <td style={{ color: 'Goldenrod', fontWeight: 'bold' }}>{subpedido.InversionDeStock}</td>
+                                            <td style={{ color: 'Teal', fontWeight: 'bold' }}>{subpedido['Piezas a pedir']}</td>
+                                            <td style={{ color: 'Crimson', fontWeight: 'bold' }}>{inversionPiezasPedir}</td>
                                         </tr>
+                                        </>
                                     );
                                 }
                                 return null;
                             });
+
+                            const shouldInsertEmptyRow = countRow % 7 === 0;
+
+                            const emptyRow = shouldInsertEmptyRow ? (
+                                <>
+                                    <tr key={`documento-${index}-pagebreak`} className="pagebreak"></tr>
+                                    <tr >hola</tr>
+                                </>
+                            ): null;
+
+                            return [...rows, emptyRow];
+
+
+
                         })}
-                    </tbody>
+                    </tbody> */}
+                    <tbody>
+    {(() => {
+        const rows = [];
+
+        for (let index = 0; index < pedidos.length; index++) {
+            const documento = pedidos[index];
+            const pedido = Object.values(documento)[0].pedido;
+
+            for (let subIndex = 0; subIndex < pedido.length; subIndex++) {
+                const subpedido = pedido[subIndex];
+                if (subpedido['Piezas a pedir'] > 0) {
+                    const inversionPiezasPedir = subpedido['Piezas a pedir'] * subpedido.Precio;
+                    countRow++;
+
+                    rows.push(
+                        <tr key={`documento-${index}-subpedido-${subIndex}`}>
+                            <td className="newTable" style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Material}</td>
+                            <td className="newTable" style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Dimension}</td>
+                            <td className="newTable" style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.Proveedor}</td>
+                            <td className="newTable" style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadDeTarimas}</td>
+                            <td className="newTable" style={{ color: 'dark', fontWeight: 'bold' }}>{subpedido.CantidadPorMaterial}</td>
+                            <td className="newTable" style={{ color: 'green', fontWeight: 'bold' }}>{subpedido.Precio}</td>
+                            <td className="newTable" style={{ color: 'CornflowerBlue', fontWeight: 'bold' }}>{subpedido.TotalPiezas}</td>
+                            <td className="newTable" style={{ color: 'Goldenrod', fontWeight: 'bold' }}>{subpedido.StockPiezas}</td>
+                            <td className="newTable" style={{ color: 'CornflowerBlue', fontWeight: 'bold' }}>{subpedido.TotalDeInversion}</td>
+                            <td className="newTable" style={{ color: 'Goldenrod', fontWeight: 'bold' }}>{subpedido.InversionDeStock}</td>
+                            <td className="newTable" style={{ color: 'Teal', fontWeight: 'bold' }}>{subpedido['Piezas a pedir']}</td>
+                            <td className="newTable" style={{ color: 'Crimson', fontWeight: 'bold' }}>{inversionPiezasPedir}</td>
+                        </tr>
+                    );
+                    const shouldInsertEmptyRow = countRow % 10 === 0;
+                    console.log("Console",countRow)
+        
+                    if (shouldInsertEmptyRow) {
+                        rows.push(
+                            <tr key={`documento-${index}-pagebreak`} className="pagebreak"></tr>
+                        );
+                        countRow=0;
+                    }
+                }
+            }
+
+        }
+
+        return rows;
+    })()}
+</tbody>
+
                 </table>
 
             </div>
